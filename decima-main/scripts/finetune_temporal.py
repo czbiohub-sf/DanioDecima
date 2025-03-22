@@ -66,7 +66,7 @@ def main():
         "devices": 0,
         "logger": "wandb",
         "save_dir": data_dir,
-        "max_epochs": 15,
+        "max_epochs": 50,
         "lr":args.lr,
         "total_weight": args.weight,
         "accumulate_grad_batches": args.grad,
@@ -84,7 +84,7 @@ def main():
     "checkpoint_path": args.checkpoint_path,
     "cell_types": 3,
     "expr_input_dim": 3,
-    "expr_hidden_dim": 64, #256
+    "expr_hidden_dim": 256, #64, #256
     "model_dim": 120,
     "num_transformer_layers": 4,
     "num_heads": 4,

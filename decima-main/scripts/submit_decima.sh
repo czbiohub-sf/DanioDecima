@@ -31,10 +31,10 @@ bs=2
 rep=0
 
 # Use SLURM_ARRAY_TASK_ID as the replicate number
-name="decima_v20250319_pretrained_rep${rep}_forecast_horizon_5_lstm"
+name="decima_v20250320_pretrained_rep${rep}_forecast_horizon_5_lstm_ae_ablateseq"
 
 # Run the fine-tuning script
-python ${scripts_dir}/finetune.py \
+python ${scripts_dir}/finetune_temporal.py \
     --name ${name} \
     --dir ${save_dir} \
     --lr ${lr} \

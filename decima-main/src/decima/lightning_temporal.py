@@ -205,13 +205,55 @@ class GeneTissueSpecificLSTM(nn.Module):
         
         return interaction_scores.detach().cpu().numpy()
 
+# --- Expression Autoencoder Module ---
+class ExpressionAutoencoder(nn.Module):
+    def __init__(self, history_length, n_tissues, latent_dim=16):
+        """
+        Autoencoder to learn a latent representation of the historical expression.
+        
+        Args:
+            history_length: Number of timepoints in the historical expression.
+            n_tissues: Number of tissues (each gene's time series is [history_length, n_tissues]).
+            latent_dim: Dimensionality of the latent representation.
+        """
+        super().__init__()
+        self.history_length = history_length
+        self.n_tissues = n_tissues
+        self.input_dim = history_length * n_tissues
+        
+        # Encoder: flatten the input and reduce dimension.
+        self.encoder = nn.Sequential(
+            nn.Linear(self.input_dim, 32),
+            nn.ReLU(),
+            nn.Linear(32, latent_dim)
+        )
+        # Decoder: reconstruct the flattened input.
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, 32),
+            nn.ReLU(),
+            nn.Linear(32, self.input_dim)
+        )
+    
+    def forward(self, x):
+        # x shape: [batch, history_length, n_tissues]
+        batch_size = x.size(0)
+        flat = x.view(batch_size, -1)
+        latent = self.encoder(flat)
+        reconstruction = self.decoder(latent)
+        reconstruction = reconstruction.view(batch_size, self.history_length, self.n_tissues)
+        return latent, reconstruction
+    
 
 class JointModel(nn.Module):
-    def __init__(self, decima_model: DecimaModel, forecast_model: GeneTissueSpecificLSTM):
+    def __init__(self, decima_model: DecimaModel, forecast_model: GeneTissueSpecificLSTM, expr_autoencoder: nn.Module, ablate_static_emb: bool = True):
         super().__init__()
         self.decima = decima_model
         self.forecast_model = forecast_model
+        self.expr_autoencoder = expr_autoencoder
         self.activation = torch.exp
+        self.ablate_static_emb = ablate_static_emb
+        self.combined_proj = nn.Linear(1920 + 16, 1920)  # Project back to DECIMA embedding size
+
 
     def forward(self, static_seq, expr_series, logits: bool = False):
         """
@@ -231,9 +273,39 @@ class JointModel(nn.Module):
         embedding = self.decima.embedding(static_seq)  # Extract decima embedding.
         embedding = self.decima.head.pool(embedding)
         
+        if embedding.dim() > 2:
+            embedding = embedding.squeeze(-1)
+        
+        if self.ablate_static_emb:
+            embedding = torch.zeros_like(embedding)
+
+        # Process autoencoder branch if provided.
+        if self.expr_autoencoder is not None:
+            ae_latent, ae_reconstruction = self.expr_autoencoder(expr_series)
+        else:
+            ae_latent, ae_reconstruction = None, None
+        
+        # Fuse static embedding with autoencoder latent (if available)
+        if ae_latent is not None:
+            # Check if shapes are compatible for concatenation
+            if embedding.shape[0] == ae_latent.shape[0]:
+                try:
+                    combined_emb = torch.cat([embedding, ae_latent], dim=1)
+                    combined_emb = self.combined_proj(combined_emb)
+                except RuntimeError as e:
+                    print(f"Error concatenating tensors: {e}")
+                    print(f"Embedding shape: {embedding.shape}, AE latent shape: {ae_latent.shape}")
+                    # Fall back to using just the embedding
+                    combined_emb = embedding
+            else:
+                print(f"Batch size mismatch: Embedding {embedding.shape[0]}, AE latent {ae_latent.shape[0]}")
+                combined_emb = embedding
+        else:
+            combined_emb = embedding
+        
         # Forecasting branch: use the historical expression along with static sequence conditioning.
-        forecast_pred = self.forecast_model(expr_series, embedding)
-        return decima_pred, forecast_pred, embedding
+        forecast_pred = self.forecast_model(expr_series, combined_emb)
+        return decima_pred, forecast_pred, embedding, ae_reconstruction
 
 # Create a Lightning module to train jointly.
 class JointLightningModel(pl.LightningModule):
@@ -251,6 +323,7 @@ class JointLightningModel(pl.LightningModule):
             "accumulate_grad_batches": 1,
             "decima_loss_weight": 1.0,
             "forecast_loss_weight": 1.0,
+            "ae_loss_weight": 1.0,
         }
         for key, value in default_train_params.items():
             if key not in train_params:
@@ -269,7 +342,7 @@ class JointLightningModel(pl.LightningModule):
             checkpoint_path=self.model_params.get("checkpoint_path", None)
         )
         
-        print(f"self.model_params: {self.model_params}")
+        #print(f"self.model_params: {self.model_params}")
 
         self.forecast_model = GeneTissueSpecificLSTM(
             expr_input_dim=self.model_params.get("expr_input_dim", self.model_params["cell_types"]),  # input dimension is n_cell_types
@@ -280,8 +353,16 @@ class JointLightningModel(pl.LightningModule):
             dropout=self.model_params.get("dropout", 0.2),
             gene_embedding_dim=1920
         )
+        
+        # Optionally build Expression Autoencoder if desired.
+        self.expr_autoencoder = ExpressionAutoencoder(
+            history_length=self.model_params.get("history_length", 5),
+            n_tissues=self.model_params["cell_types"],
+            latent_dim=self.model_params.get("ae_latent_dim", 16)
+        )
+        
         # Joint model combining both branches.
-        self.model = JointModel(self.decima, self.forecast_model)
+        self.model = JointModel(self.decima, self.forecast_model, expr_autoencoder=self.expr_autoencoder)
         
         # Loss functions:
         # For decima, use TaskWisePoissonMultinomialLoss on historical expression.
@@ -291,7 +372,7 @@ class JointLightningModel(pl.LightningModule):
                 )
         # For forecasting, use MSE loss (for now)
         self.forecast_loss_fn = nn.MSELoss()
-
+        self.ae_loss_fn = nn.MSELoss()
         self.val_losses = []
         self.test_losses = []
         
@@ -333,14 +414,14 @@ class JointLightningModel(pl.LightningModule):
         static_seq = batch["static_sequence"]
         static_seq = self.format_input(static_seq)
         expr_series = batch["expr_series"]
-        decima_pred, forecast_pred, embedding = self.model(static_seq, expr_series, logits)
+        decima_pred, forecast_pred, embedding, ae_reconstruction = self.model(static_seq, expr_series, logits)
         # Apply transform
         decima_pred = self.transform(decima_pred)
-        return decima_pred, forecast_pred, embedding
+        return decima_pred, forecast_pred, embedding, ae_reconstruction
 
     def training_step(self, batch, batch_idx):
         # Assume the batch dict includes: "static_sequence", "expr_series", "target"
-        decima_pred, forecast_pred, _ = self.forward(batch, logits=True)
+        decima_pred, forecast_pred, embedding, ae_reconstruction = self.forward(batch, logits=True)
         # For decima loss, assume we want to reconstruct the historical expression.
         # Use the historical input as ground truth.
         historical_target = batch["expr_series"]  # shape: [batch, history_length, n_tissues]
@@ -351,9 +432,14 @@ class JointLightningModel(pl.LightningModule):
         # Forecasting loss:
         forecast_target = batch["target"]  # shape: [batch, forecast_horizon, n_tissues]
         loss_forecast = self.forecast_loss_fn(forecast_pred, forecast_target)
+
+        loss_ae = self.ae_loss_fn(ae_reconstruction, batch["expr_series"])
         
         # Joint loss (weighted sum)
-        loss = self.train_params["decima_loss_weight"] * loss_decima + self.train_params["forecast_loss_weight"] * loss_forecast
+        loss = (self.train_params["decima_loss_weight"] * loss_decima +
+                self.train_params["forecast_loss_weight"] * loss_forecast +
+                self.train_params["ae_loss_weight"] * loss_ae)
+        
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
         #self.log("train_decima_loss", loss_decima, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
         #self.log("train_forecast_loss", loss_forecast, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
@@ -381,7 +467,7 @@ class JointLightningModel(pl.LightningModule):
             self.log("embedding_param_norm", param_norm)
     
     def validation_step(self, batch, batch_idx):
-        decima_pred, forecast_pred, _ = self.forward(batch, logits=True)
+        decima_pred, forecast_pred, _, _ = self.forward(batch, logits=True)
         historical_target = batch["expr_series"]#.mean(dim=1)
         historical_target = historical_target.reshape(historical_target.size(0), -1)
         loss_decima = self.decima_loss_fn(decima_pred, historical_target)
@@ -416,7 +502,7 @@ class JointLightningModel(pl.LightningModule):
         self.val_losses = []
 
     def test_step(self, batch, batch_idx):
-        decima_pred, forecast_pred, _ = self.forward(batch, logits=True)
+        decima_pred, forecast_pred, _, _ = self.forward(batch, logits=True)
         historical_target = batch["expr_series"]#.mean(dim=1)
         historical_target = historical_target.reshape(historical_target.size(0), -1)
         loss_decima = self.decima_loss_fn(decima_pred, historical_target)

@@ -37,9 +37,9 @@ def main():
     wandb.login(key="***REMOVED_WANDB_KEY***")
     
     run = wandb.init(
-        project="decima", 
-        entity="mathiasjvoges-chan-zuckerberg-biohub",
-        dir=args.name,      # Logs saved under a specific directory
+        project="decima-zebrafish", 
+        entity="czbsf-comp-bio",
+        dir=args.dir,      # Logs saved under a specific directory
         name=args.name      # Name of the run
     )
 

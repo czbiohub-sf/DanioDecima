@@ -34,12 +34,12 @@ args = parser.parse_args()
 os.environ["WANDB_START_METHOD"] = "thread"
 
 def main():
+    #wandb.login(key="***REMOVED_WANDB_KEY***")
     wandb.login(key="***REMOVED_WANDB_KEY***")
-    
     run = wandb.init(
-        project="decima", 
-        entity="mathiasjvoges-chan-zuckerberg-biohub",
-        dir=args.name,      # Logs saved under a specific directory
+        project="decima-zebrafish", 
+        entity="czbsf-comp-bio",
+        dir=args.dir,      # Logs saved under a specific directory
         name=args.name      # Name of the run
     )
 
@@ -71,7 +71,7 @@ def main():
         "devices": 0,
         "logger": "wandb",
         "save_dir": data_dir,
-        "max_epochs": 15,
+        "max_epochs": 100,
         "lr":args.lr,
         "total_weight": args.weight,
         "accumulate_grad_batches": args.grad,

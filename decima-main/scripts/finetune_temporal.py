@@ -34,12 +34,12 @@ args = parser.parse_args()
 os.environ["WANDB_START_METHOD"] = "thread"
 
 def main():
-    wandb.login(key="f4888f01045f8075172558b40b050041c740fa0c")
+    wandb.login(key="66d3a7a85d4d04f8bd1f27bcac1555e1c7b2e96e")
     
     run = wandb.init(
-        project="decima", 
-        entity="mathiasjvoges-chan-zuckerberg-biohub",
-        dir=args.name,      # Logs saved under a specific directory
+        project="decima-zebrafish", 
+        entity="czbsf-comp-bio",
+        dir=args.dir,      # Logs saved under a specific directory
         name=args.name      # Name of the run
     )
 

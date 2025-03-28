@@ -21,8 +21,8 @@ parser.add_argument("--bs", type=int, default=4)
 parser.add_argument("--init_mode", type=str, default="random", 
                    choices=["pretrained", "random", "xavier", "kaiming", "zeros"],
                    help="Weight initialization mode")
-parser.add_argument("--pretrained_source", type=str, default="wandb",
-                   choices=["wandb", "local"],
+parser.add_argument("--pretrained_source", type=str, default="wandb-human",
+                   choices=["wandb-human", "wandb-mouse", "local"],
                    help="Source of pretrained weights")
 parser.add_argument("--wandb_project", type=str, default="grelu/borzoi",
                    help="WandB project path for pretrained weights")

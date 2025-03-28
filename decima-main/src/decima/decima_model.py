@@ -28,32 +28,64 @@ class DecimaModel(BaseModel):
         """
         self.mask = mask
 
-        # Create the base model architecture
-        model = BorzoiModel(
-            crop_len=5120,
-            n_tasks=7611,
-            stem_channels=512,
-            stem_kernel_size=15,
-            init_channels=608,
-            n_conv=7,
-            kernel_size=5,
-            n_transformers=8,
-            key_len=64,
-            value_len=192,
-            pos_dropout=0.0,
-            attn_dropout=0.0,
-            n_heads=8,
-            n_pos_features=32,
-            final_act_func=None,
-            final_pool_func=None,
-        )
         
         if init_mode == "pretrained":
             print(f"Initializing with pretrained weights from {pretrained_source}")
-            if pretrained_source == "wandb":
+            if pretrained_source == "wandb-human":
                 try:
+                    # Create the base model architecture for human
+                    model = BorzoiModel(
+                        crop_len=5120,
+                        n_tasks=7611,
+                        stem_channels=512,
+                        stem_kernel_size=15,
+                        init_channels=608,
+                        n_conv=7,
+                        kernel_size=5,
+                        n_transformers=8, #2
+                        key_len=64,
+                        value_len=192,
+                        pos_dropout=0.0,
+                        attn_dropout=0.0,
+                        n_heads=8,
+                        n_pos_features=32,
+                        final_act_func=None,
+                        final_pool_func=None,
+                    )
                     api = wandb.Api()
                     art = api.artifact(f'{wandb_project}/human_state_dict_fold{replicate}:latest')
+                    with TemporaryDirectory() as d:
+                        art.download(d)
+                        state_dict = torch.load(Path(d) / f"fold{replicate}.h5")
+                    model.load_state_dict(state_dict)
+                    print("Successfully loaded pretrained weights from WandB")
+                except Exception as e:
+                    print(f"Error loading pretrained weights from WandB: {e}")
+                    print("Falling back to random initialization")
+                    init_mode = "random"
+            elif pretrained_source == "wandb-mouse":
+                try:
+                    # Create the base model architecture for mouse
+                    model = BorzoiModel(
+                        crop_len=5120,
+                        n_tasks=2608,
+                        stem_channels=512,
+                        stem_kernel_size=15,
+                        init_channels=608,
+                        n_conv=7,
+                        kernel_size=5,
+                        n_transformers=8, #2
+                        key_len=64,
+                        value_len=192,
+                        pos_dropout=0.0,
+                        attn_dropout=0.0,
+                        n_heads=8,
+                        n_pos_features=32,
+                        final_act_func=None,
+                        final_pool_func=None,
+                    )
+                    api = wandb.Api()
+                    art = api.artifact(f'{wandb_project}/mouse_state_dict_fold{replicate}:latest')
                     with TemporaryDirectory() as d:
                         art.download(d)
                         state_dict = torch.load(Path(d) / f"fold{replicate}.h5")
@@ -79,12 +111,35 @@ class DecimaModel(BaseModel):
         
         if init_mode != "pretrained":
             print(f"Initializing with {init_mode} initialization")
+            # Create the base model architecture for human when doing random initialization
+            model = BorzoiModel(
+                crop_len=5120,
+                n_tasks=7611,
+                stem_channels=512,
+                stem_kernel_size=15,
+                init_channels=608,
+                n_conv=7,
+                kernel_size=5,
+                n_transformers=8, #2
+                key_len=64,
+                value_len=192,
+                pos_dropout=0.0,
+                attn_dropout=0.0,
+                n_heads=8,
+                n_pos_features=32,
+                final_act_func=None,
+                final_pool_func=None,
+            )
             for name, param in model.named_parameters():
                 if 'weight' in name:
                     if init_mode == "xavier":
                         nn.init.xavier_uniform_(param)
                     elif init_mode == "kaiming":
-                        nn.init.kaiming_normal_(param)
+                        if param.dim() >= 2:
+                            nn.init.kaiming_normal_(param)
+                        else:
+                            # For 1D tensors (like biases), use a normal distribution initialization
+                            nn.init.normal_(param, mean=0, std=0.01)
                     elif init_mode == "zeros":
                         nn.init.zeros_(param)
                     # Random is PyTorch default, so no action needed

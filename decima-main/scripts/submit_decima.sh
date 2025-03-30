@@ -4,10 +4,10 @@
 #SBATCH --nodes=1                    # Request 4 nodes
 #SBATCH --ntasks=1                   # Request 4 tasks
 #SBATCH --gres=gpu:2                # Request 2 GPUs (of any type)
-#SBATCH --constraint="h100|h200|a100"      # Only nodes with GPUs labeled h100 OR h200
+#SBATCH --constraint="h100|h200"      # Only nodes with GPUs labeled h100 OR h200
 #SBATCH --cpus-per-task=8          # Number of CPU cores per task (adjust as needed)
 #SBATCH --mem=100G                   # Total memory per node (adjust as needed)
-#SBATCH --time=12:00:00              # Time limit (2 days)
+#SBATCH --time=48:00:00              # Time limit (2 days)
 #SBATCH --output=logs/decima_finetune_%A_%a.out
 #SBATCH --error=logs/decima_finetune_%A_%a.err
 
@@ -31,7 +31,7 @@ bs=4
 rep=0
 
 # Use SLURM_ARRAY_TASK_ID as the replicate number
-name="decima_v20250327_pretrained-human_rep${rep}-smoothness-loss"
+name="decima_v20250330_pretrained-human_rep${rep}_smooth-gp-01"
 
 # Run the fine-tuning script
 python ${scripts_dir}/finetune.py \

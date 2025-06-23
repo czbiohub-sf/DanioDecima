@@ -42,6 +42,7 @@ default_train_params = {
     "accumulate_grad_batches":1,
     "total_weight": 1e-4,
     "disease_weight":1e-2,
+    "weight_decay": 1e-4
 }
 
 def temporal_loss_grouped(y_pred, lambda_smooth=0.1, loss_type='l2', length_scale=2.0):
@@ -276,27 +277,32 @@ class LightningModel(pl.LightningModule):
     def training_step(self, batch: Tensor, batch_idx: int) -> Tensor:
         x, y = batch
         logits = self.forward(x, logits=True)
-        decima_loss = self.decima_loss(logits, y)
-        smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=0.1, loss_type='gp')
+        decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
+        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
         #smoothness_loss = 0
         self.log("train_loss", decima_loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
-        self.log("train_smoothness_loss", smoothness_loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
-        loss = decima_loss + smoothness_loss
-        self.log("train_combined_loss", loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
+        #self.log("train_smoothness_loss", smoothness_loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
+        self.log("train_poisson_loss", poisson_term, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
+        self.log("train_multinomial_loss", multinomial_term, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
+        loss = decima_loss# + smoothness_loss
+        #self.log("train_combined_loss", loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
         return loss
 
     def validation_step(self, batch: Tensor, batch_idx: int) -> Tensor:
         x, y = batch
         logits = self.forward(x, logits=True)
-        decima_loss = self.decima_loss(logits, y)
-        smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=0.1, loss_type='gp')
+        decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
+        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
         #smoothness_loss = 0
         y_hat = self.activation(logits)
-        self.log("val_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
-        self.log("val_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        print(f"Pred variance: {y_hat.var():.6f}, Target variance: {y.var():.6f}")
+        #self.log("val_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        self.log("val_poisson_loss", poisson_term, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        self.log("val_multinomial_loss", multinomial_term, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        #self.log("val_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
         self.val_metrics.update(y_hat, y)
-        loss = decima_loss + smoothness_loss
-        self.log("val_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        loss = decima_loss# + smoothness_loss
+        #self.log("val_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
         self.val_losses.append(loss)
         return loss
 
@@ -311,7 +317,7 @@ class LightningModel(pl.LightningModule):
         losses = torch.stack(self.val_losses)
         mean_losses = torch.mean(losses)
         # Log
-        self.log_dict(mean_val_metrics)
+        self.log_dict(mean_val_metrics, sync_dist=True)
         self.log("val_loss", mean_losses, sync_dist=True)
         self.val_metrics.reset()
         self.val_losses = []
@@ -322,15 +328,17 @@ class LightningModel(pl.LightningModule):
         """
         x, y = batch
         logits = self.forward(x, logits=True)
-        decima_loss = self.decima_loss(logits, y)
-        smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=0.1, loss_type='gp')
+        decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
+        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
         #smoothness_loss = 0
         y_hat = self.activation(logits)
-        self.log("test_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
-        self.log("test_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        #self.log("test_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        self.log("test_poisson_loss", poisson_term, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        self.log("test_multinomial_loss", multinomial_term, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        #self.log("test_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
         self.test_metrics.update(y_hat, y)
-        loss = decima_loss + smoothness_loss
-        self.log("test_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        loss = decima_loss# + smoothness_loss
+        #self.log("test_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
         self.test_losses.append(loss)
         return loss
 
@@ -339,7 +347,7 @@ class LightningModel(pl.LightningModule):
         Calculate metrics for entire test set
         """
         self.computed_test_metrics = self.test_metrics.compute()
-        self.log_dict({k: v.mean() for k, v in self.computed_test_metrics.items()})
+        self.log_dict({k: v.mean() for k, v in self.computed_test_metrics.items()}, sync_dist=True)
         losses = torch.stack(self.test_losses)
         self.log("test_loss", torch.mean(losses), sync_dist=True)
         self.test_metrics.reset()
@@ -347,9 +355,11 @@ class LightningModel(pl.LightningModule):
 
     def configure_optimizers(self) -> None:
         """
-        Configure oprimizer for training
+        Configure optimizer for training
         """
-        return optim.Adam(self.parameters(), lr=self.train_params["lr"])
+        return optim.Adam(self.parameters(), 
+                        lr=self.train_params["lr"], 
+                        weight_decay=self.train_params.get("weight_decay", 1e-4))
 
     def count_params(self) -> int:
         """
@@ -358,11 +368,9 @@ class LightningModel(pl.LightningModule):
         return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
     def parse_logger(self) -> str:
-        """
-        Parses the name of the logger supplied in train_params.
-        """
         if "name" not in self.train_params:
             self.train_params["name"] = datetime.now().strftime("%Y_%d_%m_%H_%M")
+        
         if self.train_params["logger"] == "wandb":
             logger = WandbLogger(
                 name=self.train_params["name"],
@@ -371,10 +379,22 @@ class LightningModel(pl.LightningModule):
             )
         elif self.train_params["logger"] == "csv":
             logger = CSVLogger(
-                name=self.train_params["name"], save_dir=self.train_params["save_dir"]
+                name=self.train_params["name"], 
+                save_dir=self.train_params["save_dir"]
+            )
+        elif self.train_params["logger"] == "tensorboard":
+            # Add support for TensorBoard logger
+            from pytorch_lightning.loggers import TensorBoardLogger
+            logger = TensorBoardLogger(
+                save_dir=self.train_params["save_dir"],
+                name=self.train_params["name"]
             )
         else:
-            raise NotImplementedError
+            # Support passing a logger object directly
+            if isinstance(self.train_params["logger"], pl.loggers.Logger):
+                logger = self.train_params["logger"]
+            else:
+                raise NotImplementedError
         return logger
 
     def add_transform(self, prediction_transform: Callable) -> None:
@@ -462,27 +482,65 @@ class LightningModel(pl.LightningModule):
         # Set up logging
         logger = self.parse_logger()
 
+        # Set up callbacks
+        callbacks = [
+            ModelCheckpoint(monitor="val_loss", mode="min", save_last=True)
+        ]
+        # Add early stopping callback if specified
+        if "early_stopping_patience" in self.train_params:
+            from pytorch_lightning.callbacks import EarlyStopping
+            early_stopping = EarlyStopping(
+                monitor="val_loss",
+                patience=self.train_params["early_stopping_patience"],
+                min_delta=self.train_params.get("early_stopping_min_delta", 0.0),
+                verbose=True,
+                mode="min"
+            )
+            callbacks.append(early_stopping)
+        
+        # os.environ["MASTER_ADDR"] = "localhost"
+        # if "MASTER_PORT" not in os.environ:
+        #     os.environ["MASTER_PORT"] = str(random.randint(20000, 29999))
+
+        # Get trainer settings from train_params or use defaults
+        accelerator = self.train_params.get("accelerator", "gpu" if torch.cuda.is_available() else "cpu")
+        devices = self.train_params.get("devices", None)
+        precision = self.train_params.get("precision", "16-mixed" if accelerator == "gpu" else "32")
+        strategy = self.train_params.get("strategy", None)
+        
+        print(f"Training with: accelerator={accelerator}, devices={devices}, precision={precision}")
+        
         # Set up trainer
         trainer = pl.Trainer(
             max_epochs=self.train_params["max_epochs"],
-            accelerator='gpu',
-            devices=make_list(self.train_params["devices"]),
+            #max_steps=self.train_params["max_steps"],
+            accelerator=accelerator,
+            devices=devices,
             logger=logger,
-            callbacks=[ModelCheckpoint(monitor="val_loss", mode="min", save_last=True)],
+            callbacks=callbacks,
             default_root_dir=self.train_params["save_dir"],
             accumulate_grad_batches=self.train_params["accumulate_grad_batches"],
-            precision="16-mixed",
-            strategy="ddp",
+            precision=precision,
+            strategy=strategy,
+            gradient_clip_val=self.train_params.get("gradient_clip_val", None),
+            gradient_clip_algorithm=self.train_params.get("gradient_clip_algorithm", None),
+            deterministic=True,
+            enable_model_summary=True,
         )
 
+        # Set seed right before training if provided
+        if "seed" in self.train_params:
+            pl.seed_everything(self.train_params["seed"], workers=True)
+            print(f"Set PyTorch Lightning seed to: {self.train_params['seed']}")
+            
         # Make dataloaders
         train_dataloader = self.make_train_loader(train_dataset)
         val_dataloader = self.make_test_loader(val_dataset)
 
-        if checkpoint_path is None:
-            # First validation pass
-            trainer.validate(model=self, dataloaders=val_dataloader)
-            self.val_metrics.reset()
+        # if checkpoint_path is None:
+        #     # First validation pass
+        #     trainer.validate(model=self, dataloaders=val_dataloader)
+        #     self.val_metrics.reset()
 
         # Add data parameters
         self.data_params["tasks"] = train_dataset.tasks.reset_index(

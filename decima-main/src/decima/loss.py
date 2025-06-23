@@ -25,10 +25,10 @@ class TaskWisePoissonMultinomialLoss(nn.Module):
         total_input = input.sum(axis=-1)  # B,
 
         # total count poisson loss, mean across targets
-        poisson_term = F.poisson_nll_loss(
+        poisson_term_raw = F.poisson_nll_loss(
             total_input, total_target, log_input=False, reduction="mean"
         )  # B
-        poisson_term = self.total_weight * poisson_term  # B,
+        poisson_term = self.total_weight * poisson_term_raw  # B,
 
         # Get multinomial probabilities
         p_input = input / total_input.unsqueeze(1)  # B, T
@@ -38,10 +38,12 @@ class TaskWisePoissonMultinomialLoss(nn.Module):
         multinomial_dot = -torch.multiply(target, log_p_input)  # B x T
         multinomial_term = multinomial_dot.mean()
 
+        #print(f"total_input: {total_input.mean().item()}, total_target: {total_target.mean().item()}, raw loss: {poisson_term_raw.item()}")
+
         # Combine
         loss = multinomial_term + poisson_term
         if self.debug:
             print(
                 f"Multinomial: {multinomial_term}, Poisson: {poisson_term}"
             )
-        return loss
+        return loss, poisson_term_raw, multinomial_term

@@ -26,6 +26,10 @@ attributions = np.load(attr_file)
 print("Running modisco")
 sequences = sequences.transpose(0, 2, 1).astype("float32")
 attributions = attributions.transpose(0, 2, 1).astype("float32")
+
+print("Sequences shape:", sequences.shape)
+print("Attributions shape:", attributions.shape)
+
 pos_patterns, neg_patterns = modiscolite.tfmodisco.TFMoDISco(
     hypothetical_contribs=attributions,
     one_hot=sequences,
@@ -42,7 +46,7 @@ print("Making report")
 modiscolite.report.report_motifs(
         h5_file,
         out_dir,
-        is_writing_tomtom_matrix=True,
+        is_writing_tomtom_matrix=False,
         top_n_matches=10,
         meme_motif_db=meme_file,
         img_path_suffix="./",

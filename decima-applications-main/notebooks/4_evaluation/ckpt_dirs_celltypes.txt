@@ -1,0 +1,16 @@
+Human_Decima_0|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250618_111138/pretrained_decima-human_rep0_lr3e-05_seed42/version_0
+Human_Decima_1|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250618_111138/pretrained_decima-human_rep1_lr3e-05_seed42/version_0
+Human_Decima_2|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250618_111138/pretrained_decima-human_rep2_lr3e-05_seed42/version_0
+Human_Decima_3|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250618_111138/pretrained_decima-human_rep3_lr3e-05_seed42/version_0
+Human_Borzoi_0|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-human_rep0_lr3e-05_seed42/version_0
+Human_Borzoi_1|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-human_rep1_lr3e-05_seed42/version_0
+Human_Borzoi_2|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-human_rep2_lr3e-05_seed42/version_0
+Human_Borzoi_3|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-human_rep3_lr3e-05_seed42/version_0
+Mouse_Borzoi_0|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-mouse_rep0_lr3e-05_seed42/version_0
+Mouse_Borzoi_1|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-mouse_rep1_lr3e-05_seed42/version_0
+Mouse_Borzoi_2|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-mouse_rep2_lr3e-05_seed42/version_0
+Mouse_Borzoi_3|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/pretrained_wandb-mouse_rep3_lr3e-05_seed42/version_0
+Random_0|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/random_lr3e-06_seed42/version_0
+Random_1|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/random_lr3e-06_seed43/version_0
+Random_2|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/random_lr3e-06_seed44/version_0
+Random_3|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250617_225114/random_lr3e-06_seed45/version_0

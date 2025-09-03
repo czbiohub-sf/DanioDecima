@@ -28,3 +28,4 @@
 *.fasta
 *error.txt
 *requirements.txt
+*.ipynb

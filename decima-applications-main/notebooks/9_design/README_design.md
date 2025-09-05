@@ -1,70 +1,183 @@
-# SLURM launcher: evolve_design_pipeline.sh
+# Motif Occurrence Analysis Scripts
 
-What it does
-- Submits an array job with indices 0–399 (16 models × 25 cell types).
-- Maps each array index to a model directory and a target cell type.
-- Prepares clean, job-scoped Genomepy caches in TMPDIR before loading modules (prevents stale cache issues).
-- Loads the Python environment, sets CUDA device, thread count, and WANDB cache.
-- Creates per-run output folders under the design/ directory: one for evolved sequences and one for downstream analysis.
-- Step 1: calls 00_evolve_combined.py to evolve a promoter element for the chosen model and target cell type.
-- Step 2: if evolution succeeds and produces the expected CSV file, calls 1_read_celltypes.py to evaluate the evolved element within a fixed genomic window (chromosome 4, positions defined by tss_start, window_size, tss_offset).
-- Writes a concise pipeline summary (model label, cell type, exit codes) at the end of each task.
+This directory contains four versions of motif occurrence analysis scripts that evolved over time to handle different data structures and analysis requirements, plus the evolution pipeline that generates the data.
 
-Key SLURM resources per task
-- 1 GPU with constraint h100 or h200, 4 CPUs, 100 GB RAM, 8 hours walltime.
-- Logs written to the design/logs directory under zebrahub-decima.
+## Evolution Pipeline Overview
 
-Inputs and configuration inside the script
-- MODEL_DIRS: 16 Lightning run directories (4 human-Decima, 4 human-Borzoi, 4 mouse-Borzoi, 4 random). Each must contain a checkpoints subfolder with epoch*.ckpt and the model-specific outputs from prediction steps.
-- CELL_TYPES: list of 25 active targets (adaxial cell, brain, …, trigeminal placode).
-- DATA_DIR: base data folder for zebrahub-decima celltypes_chrom_split_v1.
-- The script computes model_idx and celltype_idx from the array index so every (model, celltype) pair is covered once.
+### Pipeline Components
 
-Outputs
-- EVOLUTION_OUTPUT_DIR: files named evolved_promoter_{ModelInfo}seed42{Celltype}_{Timepoint}_single.csv containing the per-round mutation trace and specificity trajectory.
-- ANALYSIS_OUTPUT_DIR: outputs from 1_read_celltypes.py summarizing predicted effects in the genomic window.
-- SLURM stdout and stderr per task in design/logs.
+**1. `00_submit_evolve_combined.sh` (SLURM Launcher)**
+- Submits array job with indices 0-399 (16 models × 25 cell types = 400 jobs)
+- Maps each array index to model directory and target cell type
+- Sets up clean Genomepy caches to prevent corruption
+- Runs two-step pipeline: evolution → analysis
+- Resources: 1 GPU (H100/H200), 4 CPUs, 100GB RAM, 8 hours
 
-Operational tips
-- GENOMEPY_CACHE_DIR and GENOMEPY_CONFIG_DIR are set before module load to avoid corrupt cache reuse; the script also removes any user-level genomepy caches at startup.
-- If you change the number of cell types or models, update the SBATCH array range and the CELL_TYPES or MODEL_DIRS lists to keep indices consistent.
-- Adjust timepoint, rounds, promoter length, and early-stopping thresholds in the evolution call near “STEP 1: RUNNING EVOLUTION…”.
+**2. `00_evolve_combined.py` (Evolution Script)**
+- Performs directed evolution of promoter sequences for cell type specificity
+- Uses simple mutation scanning (no batching for stability)
+- Optimizes target_mean - background_mean specificity
+- Outputs CSV with full evolution trajectory
 
-# Python evolution script: 00_evolve_combined.py
+**3. `1_read_celltypes.py` (Analysis Script)**
+- Analyzes evolved sequences with ISM (In Silico Mutagenesis)
+- Performs TF motif scanning with ISM weight calculation
+- Creates evolution plots and motif visualizations
+- Designed for single-file processing in job arrays
 
-Purpose
-- For one model and one target cell type, perform simple directed evolution of a short promoter element placed near a fixed TSS within a 524,288 bp window. The objective is to maximize specificity defined as mean prediction on target cell types minus mean prediction on background cell types at the same timepoint.
+### Pipeline Data Flow
 
-Main inputs (CLI flags)
-- model_dir: path to a Lightning run directory; the script finds the epoch checkpoint automatically.
-- data_dir: directory containing model-specific data_out files or the zebrahub aggregated AnnData.
-- output_dir: where the CSV trace is written.
-- target_celltype and timepoint: define the positive set.
-- device: GPU index.
-- rounds, sequence_length: evolution length and promoter size (default 50 rounds and 200 bp).
-- early_stopping_patience, min_improvement: stop criteria based on recent specificity improvements.
-- genomic anchors chrom, tss_start, window_size, tss_offset: define the fixed sequence context.
+SLURM Array Job → Evolution (00_evolve_combined.py) → Analysis (1_read_celltypes.py) → Motif Analysis Scripts
 
-What it does internally
-- Loads the LightningModel from the checkpoint and freezes parameters (eval mode, no grads).
-- Loads model-specific tasks metadata (from checkpoint hyperparameters) to identify target vs background cell types at the requested timepoint.
-- Builds the full genomic window using grelu sequence utilities and inserts an initial random promoter element plus a constant cargo sequence (EBFP) at the TSS offset.
-- Iterates over rounds; in each round scans all single-base substitutions across the promoter element (A/T/G/C excluding the current base), predicts with the model, and selects the mutation with the largest improvement in target-minus-background mean.
-- Records the best mutation each round into a CSV with columns: Round, Position (relative), Base, Specificity, Target_Mean, Background_Mean, Current_Element, Time_Elapsed, Convergence_Status.
-- Applies early stopping when the average specificity gain across recent rounds falls below the threshold.
-- Prints timing and convergence information and empties CUDA cache periodically to keep memory stable.
+## Analysis Scripts
 
-Outputs
-- A CSV file named evolved_promoter_{ModelInfo}seed{Seed}{Celltype}_{Timepoint}_single.csv in output_dir containing the full mutation trajectory and scores.
-- Console logs with per-round summary and final specificity.
+### 1. `02_summarize_results.py` (Basic Version)
+**Purpose:** Initial basic motif occurrence analysis  
+**Data Structure:** Flat directory with simple filenames  
+**Analysis Focus:** Model-centric tables and heatmaps  
+**Pipeline Compatibility:** ❌ Pre-pipeline, legacy format
 
-Dependencies
-- torch, numpy, pandas, anndata, tqdm, argparse; grelu sequence utilities (strings_to_one_hot, intervals_to_strings, mutate).
-- Local Decima modules via the decima-main src/decima path (LightningModel).
-- CUDA for acceleration when device ≥ 0.
+**Features:**
+- Basic filtering (p-value, ISM weight)
+- Simple filename parsing (`HumanBorzoi_rep` format)
+- Model-focused occurrence tables
+- Basic heatmaps and comparison plots
+- Expected: 4 replicates per cell type
 
-Assumptions and notes
-- ModelInfo (Human_Decima_n, Human_Borzoi_n, Mouse_Borzoi_n, Random_n) is inferred from model_dir naming; adjust extract_model_info if your directory pattern changes.
-- The specificity objective is a simple difference in means; you can swap in your own objective (e.g., log fold-change, contrastive margin) inside directed_evolution_single.
-- The promoter element is evolved in place at tss_offset; cargo sequence remains constant.
-- If your AnnData or task metadata schema differs, update filter_celltypes and the way task indices are derived.
+---
+
+### 2. `02_summarize_results_spec.py` (Enhanced Version)
+**Purpose:** Enhanced analysis with trajectory data and advanced filtering  
+**Data Structure:** Flat directory with trajectory files  
+**Analysis Focus:** Model-centric with enhanced statistics  
+**Pipeline Compatibility:** ⚠️ Partial - needs trajectory files from pipeline
+
+**Features:**
+- ✅ **Trajectory data integration** (final sequence specificity)
+- ✅ **Per-sequence ISM weight filtering** (percentile-based within each sequence)
+- ✅ **Replicate normalization** (accounts for failed evolution runs)
+- ✅ **Enhanced statistics** (ISM weight distributions, specificity metrics)
+- ✅ **Volcano plot preparation** (averaged normalized tables)
+- ✅ **Comprehensive reporting** with detailed summaries
+
+---
+
+### 3. `02_summarize_results_designs.py` (Multi-Model Pipeline Version)
+**Purpose:** Analysis for multiple model types from evolution pipeline  
+**Data Structure:** Flat directory with pipeline filenames  
+**Analysis Focus:** Both model-centric AND cell type-centric  
+**Pipeline Compatibility:** ✅ **Designed for current pipeline**
+
+**Features:**
+- ✅ **All features from "spec" version**
+- ✅ **Multiple model types** (Human-Borzoi, Human-Decima, Mouse-Borzoi, Random)
+- ✅ **Pipeline filename parsing** (`evolved_promoter_Model_rep_seed_celltype_timepoint_single`)
+- ✅ **Dual analysis approach** (model-focused + cell type-focused tables)
+- ✅ **Cell type-specific summaries with model breakdown**
+- Expected: 16 replicates per cell type (4 model types × 4 reps)
+
+**Filename Pattern Support:**
+
+evolved_promoter_Human_Decima_0_seed42_neural_crest_16hpf_single_final_motifs.csv
+evolved_promoter_Human_Decima_0_seed42_neural_crest_16hpf_single_trajectory.csv
+
+
+---
+
+### 4. `02_summarize_results_designs_test.py` (Nested Directory Version)
+**Purpose:** Analysis for nested directory structure with robust error handling  
+**Data Structure:** Nested subdirectories (e.g., `analysis_25ct_20250619/`)  
+**Analysis Focus:** Primarily cell type-centric  
+**Pipeline Compatibility:** ✅ **For archived/organized pipeline results**
+
+**Features:**
+- ✅ **All advanced filtering from previous versions**
+- ✅ **Nested directory support** (searches through subdirectories)
+- ✅ **Robust filename parsing** (multiple fallback patterns)
+- ✅ **Extensive error handling** and debugging capabilities
+- ✅ **Debug mode** (`--debug` flag to examine filenames)
+- ✅ **Directory-based metadata extraction**
+
+
+## Quick Selection Guide
+
+| Your Data Source | Recommended Script |
+|------------------|-------------------|
+| **Current evolution pipeline output** | `02_summarize_results_designs.py` |
+| **Archived pipeline results (nested dirs)** | `02_summarize_results_designs_test.py` |
+| **Legacy single-model data** | `02_summarize_results_spec.py` |
+| **Very basic analysis** | `02_summarize_results.py` |
+
+## Pipeline Output Structure
+
+### Evolution Pipeline Generates:
+
+evolved_${NUM_CELLTYPES}ct_${DATE}/
+
+├── evolved_promoter_Human_Decima_0_seed42_brain_16hpf_single.csv
+
+├── evolved_promoter_Human_Borzoi_1_seed42_neural_crest_16hpf_single.csv
+
+└── ...
+
+analysis_${NUM_CELLTYPES}ct_${DATE}/
+
+├── evolved_promoter_Human_Decima_0_seed42_brain_16hpf_single_trajectory.csv
+
+├── evolved_promoter_Human_Decima_0_seed42_brain_16hpf_single_final_motifs.csv
+
+├── evolved_promoter_Human_Decima_0_seed42_brain_16hpf_single_evolution_plots.png
+
+└── ...
+
+
+### Analysis Scripts Process:
+- **Trajectory files** (`*_trajectory.csv`) - Evolution progress with specificity scores
+- **Motif files** (`*_final_motifs.csv`) - TF motifs with ISM weights
+- **Plot files** (`*_evolution_plots.png`, `*_ism_*.png`) - Visualizations
+
+## Key Parameters
+
+### Evolution Parameters (`00_evolve_combined.py`):
+- `--rounds`: Evolution rounds (default: 100)
+- `--sequence_length`: Promoter length (default: 200bp)
+- `--early_stopping_patience`: Convergence patience (default: 50)
+- `--target_celltype`: Cell type to optimize for
+
+### Analysis Parameters (all `02_summarize_results_*.py`):
+- `--results_dir`: Input directory containing motif analysis results
+- `--output_dir`: Output directory for tables and plots
+- `--max_motif_pval`: Maximum motif p-value (default: 0.05)
+- `--min_ism_weight`: Minimum ISM weight threshold (default: 0.0)
+- `--ism_percentile`: Per-sequence ISM weight percentile cutoff (default: 75.0)
+- `--min_specificity`: Minimum final sequence specificity (default: 1.0)
+
+## Output Files
+
+### Pipeline Outputs:
+- Evolution trajectories with specificity scores
+- ISM analysis results and heatmaps
+- TF motif hits with ISM weights
+- Evolution and motif visualization plots
+
+### Analysis Script Outputs:
+- Individual model/cell type occurrence tables (raw and normalized)
+- Combined occurrence tables across models and cell types
+- Comprehensive motif CSV with all details
+- Enhanced summary reports with replicate success rates
+- Volcano plot instructions and ready-to-use data
+
+## Model Types Supported
+
+The current pipeline supports 16 models across 4 types:
+- **Human-Decima** (4 replicates): Decima model pretrained on human data
+- **Human-Borzoi** (4 replicates): Borzoi model pretrained on human data  
+- **Mouse-Borzoi** (4 replicates): Borzoi model pretrained on mouse data
+- **Random** (4 replicates): Randomly initialized models
+
+## Notes
+
+- **Pipeline Integration:** Use `*designs.py` for direct pipeline output analysis
+- **Backward Compatibility:** Newer versions are generally NOT backward compatible with older data structures
+- **Specificity Calculation:** Pipeline uses `target_mean - background_mean` (not max)
+- **ISM Weights:** Calculated as mean absolute ISM values across motif positions

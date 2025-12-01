@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Base configuration
-BASE_DIR="/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima"
+BASE_DIR="/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima"
 LOG_BASE="${BASE_DIR}/experiments"
 DATA_DIR="/hpc/projects/data.science/yangjoon.kim/zebrafish-seq2func-data/celltypes_chrom_split_v1/"
-SCRIPT_DIR="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts"
+SCRIPT_DIR="/hpc/projects/data.science/yangjoon.kim/step/decima-main/scripts"
 
 # Create base directories
 mkdir -p ${LOG_BASE}
@@ -40,9 +40,11 @@ JOB_ID=$(sbatch --parsable <<EOF
 #SBATCH --array=0-15
 #SBATCH --output=${LOG_BASE}/logs/decima_exp_%A_%a.out
 #SBATCH --error=${LOG_BASE}/logs/decima_exp_%A_%a.err
+#SBATCH --mail-type=ERROR,END
+#SBATCH --mail-user=yang-joon.kim@czbiohub.org
 
 # Load environment
-module load anaconda/latest
+module load anaconda
 source activate pytorch
 
 # Set up environment - ALL in scratch space, not local home

@@ -26,4 +26,6 @@
 *.fa
 *.fasta
 *error.txt
-*requirements.txt
+*requirements.txt**/.ipynb_checkpoints/
+gReLU/
+**/**/**/.ipynb_checkpoints/

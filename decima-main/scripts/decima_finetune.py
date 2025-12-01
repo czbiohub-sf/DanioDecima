@@ -41,7 +41,7 @@ def train_single_experiment(config):
     from lightning import LightningModel
     
     # Use scratch space for temp directories instead of /tmp
-    base_scratch = "/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima"
+    base_scratch = "/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima"
     unique_id = f"{os.getpid()}_{config['seed']}"
     temp_dir = os.path.join(base_scratch, "temp_dirs", f"genomepy_tmp_{unique_id}")
     

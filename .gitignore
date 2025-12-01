@@ -5,7 +5,6 @@
 *.html
 *.json
 *.yaml
-*.yml
 *.csv
 *.tsv
 *.jsonl
@@ -29,5 +28,4 @@
 *error.txt
 *requirements.txt
 *.ipynb
-gReLU/.
 gReLU

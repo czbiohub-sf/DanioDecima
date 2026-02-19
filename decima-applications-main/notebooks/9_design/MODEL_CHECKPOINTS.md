@@ -188,9 +188,28 @@ ckpts = [
 
 These are 4 training replicates from the **20240823** experiment, representing an ensemble of models for robust attribution calculation.
 
-## Initial Zebrafish Tissue-Level Checkpoint (Historical)
+## Initial Zebrafish Tissue-Level Checkpoints (Historical)
 
-Before the cell-type-specific experiments documented above, the initial directed evolution work used a **tissue-level** zebrafish model. This checkpoint predates the 16-model systematic experiments and was used to generate early results for presentations and papers.
+Before the cell-type-specific experiments documented above, the initial directed evolution and ISM work used **tissue-level** zebrafish models. These checkpoints predate the 16-model systematic experiments.
+
+### Tissue-Level Model for ISM/Design
+
+**Run ID**: `5ly2p4gy`
+
+**Checkpoint Path**:
+```
+/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima/lightning_logs/5ly2p4gy/checkpoints/epoch=9-step=9190.ckpt
+```
+
+**Key Characteristics**:
+- **Training date**: March 2025
+- **# Tracks**: 94 pseudobulks (tissue-level granularity)
+- **Data**: `data_out_zf-Decima_Random_Rep0.h5ad`
+- **Initialization**: Random
+- **Referenced in**: `decima-main/tutorials/tutorial.py`
+- **Purpose**: Initial ISM analysis and directed evolution experiments
+
+### Time-Course Forecasting Model
 
 **Run ID**: `umv5p24k`
 
@@ -201,19 +220,22 @@ Before the cell-type-specific experiments documented above, the initial directed
 
 **Key Characteristics**:
 - **Training date**: March 19, 2025
-- **Metadata level**: Tissue-level (coarse-grained), using `stratify_columns=['timepoint', 'tissue']`
-- **Referenced in**: `4_evaluation/00_predict.py` (lines 35-36)
+- **# Tracks**: 7 (temporal series)
+- **Data**: `zebrahub_aggregated.h5ad` with `GeneForecastDataset`
+- **Purpose**: Time-course gene expression forecasting (NOT for directed evolution)
+- **Referenced in**: `4_evaluation/00_predict.py`
 
-**Timeline of Zebrafish Model Evolution**:
+### Timeline of Zebrafish Model Evolution
 
-| Date | Checkpoint | Granularity | Purpose |
-|------|------------|-------------|---------|
-| 2024-08-23 | `/gstore/data/.../20240823/` | Human/Mouse Decima | Original Decima models |
-| 2025-03-19 | `umv5p24k` | **Tissue-level** | Initial zebrafish fine-tuning & evolution |
-| 2025-06-17 | `decima_experiments_20250617_*` | Cell-type level | Systematic 16-model experiments |
-| 2025-06-18 | `decima_experiments_20250618_*` | Cell-type level | Human-Decima replicates |
+| Date | Checkpoint | Granularity | # Tracks | Purpose |
+|------|------------|-------------|----------|---------|
+| 2024-08-23 | `/gstore/data/.../20240823/` | Human/Mouse Decima | 8,856 | Original Decima models |
+| 2025-03-19 | `5ly2p4gy` | **Tissue-level** | 94 | Initial zebrafish ISM & evolution |
+| 2025-03-19 | `umv5p24k` | Temporal | 7 | Time-course forecasting |
+| 2025-06-17 | `decima_experiments_20250617_*` | Cell-type level | ~25 | Systematic 16-model experiments |
+| 2025-06-18 | `decima_experiments_20250618_*` | Cell-type level | ~25 | Human-Decima replicates |
 
-The `umv5p24k` checkpoint represents the transitional model between the original human/mouse Decima and the comprehensive cell-type-specific zebrafish experiments.
+The `5ly2p4gy` checkpoint represents the transitional model between the original human/mouse Decima and the comprehensive cell-type-specific zebrafish experiments, and was used for the initial tissue-level directed evolution work.
 
 ## Summary Table
 

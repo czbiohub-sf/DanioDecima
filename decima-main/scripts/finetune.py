@@ -34,8 +34,7 @@ args = parser.parse_args()
 os.environ["WANDB_START_METHOD"] = "thread"
 
 def main():
-    #wandb.login(key="***REMOVED_WANDB_KEY***")
-    wandb.login(key="***REMOVED_WANDB_KEY***")
+    wandb.login()
     run = wandb.init(
         project="decima-zebrafish", 
         entity="czbsf-comp-bio",

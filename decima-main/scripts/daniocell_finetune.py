@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+Fine-tuning script for Decima on the DanioCell atlas.
+
+Experiment matrix (12 experiments):
+  [0-3]  Human Decima pretrained backbone → DanioCell  (replicates 0-3, lr=3e-5)
+  [4-7]  Random initialization baseline                (seeds 42-45, lr=3e-6)
+  [8-11] 3-stage transfer: Zebrahub fine-tuned → DanioCell (replicates 0-3, lr=3e-5)
+
+Usage:
+  python daniocell_finetune.py --experiment_id 0 --data_dir <path> --log_dir <path>
+"""
 import os
 import sys
 import argparse
@@ -6,9 +17,9 @@ import random
 import torch
 import numpy as np
 import anndata
-import tempfile
 import json
 from pytorch_lightning.loggers import TensorBoardLogger
+
 
 def set_all_seeds(seed):
     """Set all random seeds for reproducibility"""
@@ -21,69 +32,57 @@ def set_all_seeds(seed):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
+
 def train_single_experiment(config):
     """Train a single experiment with given configuration"""
-    
-    # Set seeds first thing
+
     set_all_seeds(config["seed"])
-    
+
     print(f"=== EXPERIMENT CONFIG ===")
     for key, value in config.items():
         print(f"{key}: {value}")
     print(f"========================")
-    
-    # Set up paths
+
     src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
     sys.path.append(src_dir)
-    
-    # Import modules
+
     from read_hdf5 import HDF5Dataset
     from lightning import LightningModel
-    
-    # Use scratch space for temp directories instead of /tmp
-    base_scratch = config.get("scratch_dir", "/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima")
+
+    base_scratch = config.get("scratch_dir", "/hpc/scratch/group.data.science/yang-joon.kim/daniodecima-daniocell")
     unique_id = f"{os.getpid()}_{config['seed']}"
     temp_dir = os.path.join(base_scratch, "temp_dirs", f"genomepy_tmp_{unique_id}")
-    
-    # Create directories
+
     os.makedirs(temp_dir, exist_ok=True)
     os.environ["GENOMEPY_CONFIG"] = os.path.join(temp_dir, "config")
     os.environ["GENOMEPY_CACHE_DIR"] = os.path.join(temp_dir, "cache")
     os.makedirs(os.environ["GENOMEPY_CONFIG"], exist_ok=True)
     os.makedirs(os.environ["GENOMEPY_CACHE_DIR"], exist_ok=True)
-    
+
     print(f"Temp directories:")
     print(f"   Config: {os.environ['GENOMEPY_CONFIG']}")
-    print(f"   Cache: {os.environ['GENOMEPY_CACHE_DIR']}")
-    
-    # # Set deterministic port based on seed
-    # port = 20000 + (config["seed"] % 1000)
-    # os.environ["MASTER_PORT"] = str(port)
-    
-    # Load data
-    matrix_file = os.path.join(config["dir"], config.get("matrix_name", "zebrahub_aggregated.h5ad"))
+    print(f"   Cache:  {os.environ['GENOMEPY_CACHE_DIR']}")
+
+    matrix_file = os.path.join(config["dir"], config.get("matrix_name", "daniocell_aggregated.h5ad"))
     h5_file = os.path.join(config["dir"], "data.h5")
-    
+
     ad = anndata.read_h5ad(matrix_file)
-    
-    # Use seed for dataset as well
+
     train_dataset = HDF5Dataset(
-        h5_file=h5_file, ad=ad, key="train", 
+        h5_file=h5_file, ad=ad, key="train",
         max_seq_shift=5000, augment_mode="random", seed=config["seed"]
     )
     val_dataset = HDF5Dataset(h5_file=h5_file, ad=ad, key="val", max_seq_shift=0)
-    
-    # Set up logging
+
     exp_name = f"{config['init_mode']}"
     if config['init_mode'] == 'pretrained':
         exp_name += f"_{config['pretrained_source']}_rep{config['replicate']}"
     exp_name += f"_lr{config['lr']:.0e}_seed{config['seed']}"
-    
+
     log_dir = os.path.join(config["log_dir"], exp_name)
     os.makedirs(log_dir, exist_ok=True)
     logger = TensorBoardLogger(save_dir=log_dir, name="")
-    
-    # Training parameters (full config from the original)
+
     train_params = {
         "optimizer": "adam",
         "batch_size": config["bs"],
@@ -106,50 +105,45 @@ def train_single_experiment(config):
         "strategy": "auto",
         "seed": config["seed"],
     }
-    
-    # Model parameters (full config)
+
     model_params = {
         "n_tasks": ad.shape[0],
         "init_mode": config["init_mode"],
-        "seed": config["seed"],  # Pass seed to model
+        "seed": config["seed"],
     }
-    
-    # Add pretrained-specific parameters
+
     if config["init_mode"] == "pretrained":
         model_params["replicate"] = config["replicate"]
         model_params["pretrained_source"] = config["pretrained_source"]
         model_params["wandb_project"] = config["wandb_project"]
-    
-    # Create and train model
+        if config["pretrained_source"] == "local":
+            model_params["checkpoint_path"] = config["checkpoint_path"]
+
     model = LightningModel(model_params=model_params, train_params=train_params)
     trainer = model.train_on_dataset(train_dataset, val_dataset)
-    
-    # Save configuration and final metrics
+
     final_metrics = {}
     for key, value in trainer.callback_metrics.items():
         if isinstance(value, torch.Tensor):
             final_metrics[key] = value.item()
         else:
             final_metrics[key] = value
-    
-    # Save experiment info
-    non_serializable_keys = {"logger", "devices"}  # Add other problematic keys as needed
-    
+
+    non_serializable_keys = {"logger", "devices"}
     experiment_info = {
         "config": config,
         "final_metrics": final_metrics,
         "model_params": model_params,
-        "train_params": {k: v for k, v in train_params.items() 
+        "train_params": {k: v for k, v in train_params.items()
                         if k not in non_serializable_keys and not callable(v)}
     }
-    
+
     with open(os.path.join(log_dir, "experiment_info.json"), "w") as f:
         json.dump(experiment_info, f, indent=2)
-    
-    # Cleanup
+
     train_dataset.close()
     val_dataset.close()
-    
+
     print(f"Completed experiment: {exp_name}")
     print(f"Final validation loss: {final_metrics.get('val_loss', 'N/A')}")
 
@@ -160,98 +154,93 @@ def train_single_experiment(config):
     except Exception as e:
         print(f"Could not clean up temp directory {temp_dir}: {e}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Train single Decima experiment")
-    parser.add_argument("--experiment_id", type=int, required=True, help="Experiment ID (0-15)")
-    parser.add_argument("--data_dir", type=str, 
-                       default="/hpc/projects/data.science/yangjoon.kim/zebrafish-seq2func-data/celltypes_chrom_split_v1/",
-                       help="Data directory")
-    parser.add_argument("--log_dir", type=str, required=True, help="Log directory")
+    parser = argparse.ArgumentParser(description="Fine-tune Decima on DanioCell")
+    parser.add_argument("--experiment_id", type=int, required=True,
+                       help="Experiment ID (0-11 for core; 0-7 for initial runs)")
+    parser.add_argument("--data_dir", type=str,
+                       default="/hpc/scratch/group.data.science/yang-joon.kim/daniodecima-daniocell/celltypes_chrom_split_v1/",
+                       help="Directory containing daniocell_aggregated.h5ad and data.h5")
+    parser.add_argument("--log_dir", type=str, required=True,
+                       help="Directory for experiment logs and checkpoints")
     parser.add_argument("--matrix_name", type=str,
-                       default="zebrahub_aggregated.h5ad",
+                       default="daniocell_aggregated.h5ad",
                        help="Filename of the aggregated h5ad matrix within data_dir")
     parser.add_argument("--scratch_dir", type=str,
-                       default="/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima",
+                       default="/hpc/scratch/group.data.science/yang-joon.kim/daniodecima-daniocell",
                        help="Scratch directory for genomepy temp files")
 
     args = parser.parse_args()
-    
-    # Define all 16 experiments
-    experiments = []
-    
-    # Base config template (full config from your original)
+
     base_config = {
-        "dir": args.data_dir,
-        "log_dir": args.log_dir,
-        "matrix_name": args.matrix_name,
-        "scratch_dir": args.scratch_dir,
-        "bs": 4,
-        "weight": 1e-4,
-        "weight_decay": 0,
-        "grad": 5,
+        "dir":           args.data_dir,
+        "log_dir":       args.log_dir,
+        "matrix_name":   args.matrix_name,
+        "scratch_dir":   args.scratch_dir,
+        "bs":            4,
+        "weight":        1e-4,
+        "weight_decay":  0,
+        "grad":          5,
         "wandb_project": "grelu/borzoi",
-        "gradient_clip_val": 1,
-        "gradient_clip_algorithm": "norm",
-        "early_stopping_patience": 10,
-        "early_stopping_min_delta": 0.0001,
-        "max_epochs": 40,
+        "gradient_clip_val":          1,
+        "gradient_clip_algorithm":    "norm",
+        "early_stopping_patience":    10,
+        "early_stopping_min_delta":   0.0001,
+        "max_epochs":    40,
     }
-    
-    # 1. Human-Borzoi pretrained (replicates 0-3, lr=3e-5, seed=42)
+
+    experiments = []
+
+    # [0-3] Human Decima pretrained backbone → DanioCell
+    # Loads from Mathias's checkpoint dir; head is stripped, backbone reused.
     for rep in range(4):
         config = base_config.copy()
         config.update({
-            "init_mode": "pretrained",
-            "pretrained_source": "wandb-human",
-            "replicate": rep,
-            "lr": 3e-5,
-            "seed": 42,
-        })
-        experiments.append(config)
-    
-    # 2. Human-Decima pretrained (replicates 0-3, lr=3e-5, seed=42)
-    for rep in range(4):
-        config = base_config.copy()
-        config.update({
-            "init_mode": "pretrained",
+            "init_mode":        "pretrained",
             "pretrained_source": "decima-human",
-            "replicate": rep,
-            "lr": 3e-5,
-            "seed": 42,
+            "replicate":         rep,
+            "lr":                3e-5,
+            "seed":              42,
         })
         experiments.append(config)
-    
-    # 3. Mouse-Borzoi pretrained (replicates 0-3, lr=3e-5, seed=42)
-    for rep in range(4):
-        config = base_config.copy()
-        config.update({
-            "init_mode": "pretrained",
-            "pretrained_source": "wandb-mouse",
-            "replicate": rep,
-            "lr": 3e-5,
-            "seed": 42,
-        })
-        experiments.append(config)
-    
-    # 4. Random initialization (lr=3e-6, seeds=42,43,44,45)
+
+    # [4-7] Random initialization baseline
     for i in range(4):
         config = base_config.copy()
         config.update({
             "init_mode": "random",
-            "lr": 3e-6,
-            "seed": 42 + i,
+            "lr":        3e-6,
+            "seed":      42 + i,
         })
         experiments.append(config)
-    
-    # Validate experiment ID
+
+    # [8-11] Optional: 3-stage transfer (Zebrahub fine-tuned → DanioCell)
+    # Populate checkpoint_paths once Zebrahub runs are complete.
+    # Placeholder paths below — update before running array=8-11.
+    zebrahub_ckpt_dir = "/hpc/scratch/group.data.science/yang-joon.kim/zebrahub-decima/experiments"
+    for rep in range(4):
+        config = base_config.copy()
+        config.update({
+            "init_mode":         "pretrained",
+            "pretrained_source": "local",
+            "replicate":         rep,
+            "lr":                3e-5,
+            "seed":              42,
+            "checkpoint_path":   os.path.join(
+                zebrahub_ckpt_dir,
+                f"pretrained_decima-human_rep{rep}_lr3e-05_seed42",
+                "best_model.ckpt"
+            ),
+        })
+        experiments.append(config)
+
     if args.experiment_id < 0 or args.experiment_id >= len(experiments):
         raise ValueError(f"experiment_id must be between 0 and {len(experiments)-1}")
-    
-    # Get the specific experiment config
+
     config = experiments[args.experiment_id]
-    
-    # Train
     train_single_experiment(config)
+
 
 if __name__ == "__main__":
     main()

@@ -33,7 +33,7 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 mkdir -p ${LOG_DIR}
 mkdir -p ${BASE_DIR}/celltypes_chrom_split_v1
 
-ENV_CMD="module load anaconda && source activate pytorch"
+ENV_CMD="module load anaconda && source activate gReLu"
 
 echo "====================================="
 echo "DanioCell Pipeline Submission"

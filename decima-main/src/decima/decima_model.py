@@ -3,19 +3,17 @@ import grelu
 from torch import nn
 from grelu.model.models import BorzoiModel, BaseModel
 from grelu.model.heads import ConvHead
-from grelu.resources import get_artifact
-from tempfile import TemporaryDirectory
+from huggingface_hub import hf_hub_download
 from pathlib import Path
-import wandb
 import random
 import numpy as np
 
 
 class DecimaModel(BaseModel):
 
-    def __init__(self, n_tasks: int, replicate: int = 0, mask=True, init_mode="pretrained", 
-                 pretrained_source="wandb-human", wandb_project="grelu/borzoi", 
-                 checkpoint_path=None, seed=42):
+    def __init__(self, n_tasks: int, replicate: int = 0, mask=True, init_mode="pretrained",
+                 pretrained_source="wandb-human", wandb_project="grelu/borzoi",
+                 checkpoint_path=None, seed=42, hf_cache_dir=None):
         """
         Initialize the Decima model with different weight initialization strategies.
         
@@ -28,6 +26,8 @@ class DecimaModel(BaseModel):
             wandb_project: WandB project path (if using wandb)
             checkpoint_path: Path to local checkpoint file (if using local)
             seed: Random seed for reproducibility (default: 42)
+            hf_cache_dir: Directory to cache HuggingFace downloads (e.g. scratch path).
+                Defaults to None (uses HF_HOME or ~/.cache/huggingface/hub).
         """
         # Set random seeds for reproducibility
         self._set_seed(seed)
@@ -38,8 +38,10 @@ class DecimaModel(BaseModel):
         if init_mode == "pretrained":
             print(f"Initializing with pretrained weights from {pretrained_source}")
             if pretrained_source == "wandb-human":
+                # WandB is deprecated (403 Forbidden). Weights now on HuggingFace:
+                # https://huggingface.co/Genentech/borzoi-model
+                # Files: human_state_dict_rep{N}.h5  (renamed from fold{N}.h5)
                 try:
-                    # Create the base model architecture for human
                     model = BorzoiModel(
                         crop_len=5120,
                         n_tasks=7611,
@@ -58,19 +60,20 @@ class DecimaModel(BaseModel):
                         final_act_func=None,
                         final_pool_func=None,
                     )
-                    api = wandb.Api()
-                    art = api.artifact(f'{wandb_project}/human_state_dict_fold{replicate}:latest')
-                    with TemporaryDirectory() as d:
-                        art.download(d)
-                        state_dict = torch.load(Path(d) / f"fold{replicate}.h5", weights_only=True)
+                    weights_path = hf_hub_download(
+                        repo_id="Genentech/borzoi-model",
+                        filename=f"human_state_dict_rep{replicate}.h5",
+                        cache_dir=hf_cache_dir,
+                    )
+                    state_dict = torch.load(weights_path, weights_only=True)
                     model.load_state_dict(state_dict)
-                    print("Successfully loaded pretrained weights for human Borzoi from WandB")
+                    print(f"Loaded Borzoi human rep{replicate} weights from HuggingFace "
+                          f"(Genentech/borzoi-model)")
 
-                    # Flag to indicate we need to add mask channel later
                     needs_mask_channel = True
 
                 except Exception as e:
-                    print(f"Error loading pretrained weights from WandB: {e}")
+                    print(f"Error loading Borzoi human weights from HuggingFace: {e}")
                     raise RuntimeError(f"Pretrained weight loading failed: {e}") from e
             elif pretrained_source == "decima-human":
                 try:
@@ -138,8 +141,10 @@ class DecimaModel(BaseModel):
                     print(f"Error loading pretrained weights from WandB: {e}")
                     raise RuntimeError(f"Pretrained weight loading failed: {e}") from e
             elif pretrained_source == "wandb-mouse":
+                # WandB is deprecated (403 Forbidden). Weights now on HuggingFace:
+                # https://huggingface.co/Genentech/borzoi-model
+                # Files: mouse_state_dict_rep{N}.h5  (renamed from fold{N}.h5)
                 try:
-                    # Create the base model architecture for mouse
                     model = BorzoiModel(
                         crop_len=5120,
                         n_tasks=2608,
@@ -158,18 +163,20 @@ class DecimaModel(BaseModel):
                         final_act_func=None,
                         final_pool_func=None,
                     )
-                    api = wandb.Api()
-                    art = api.artifact(f'{wandb_project}/mouse_state_dict_fold{replicate}:latest')
-                    with TemporaryDirectory() as d:
-                        art.download(d)
-                        state_dict = torch.load(Path(d) / f"fold{replicate}.h5", weights_only=True)
+                    weights_path = hf_hub_download(
+                        repo_id="Genentech/borzoi-model",
+                        filename=f"mouse_state_dict_rep{replicate}.h5",
+                        cache_dir=hf_cache_dir,
+                    )
+                    state_dict = torch.load(weights_path, weights_only=True)
                     model.load_state_dict(state_dict)
-                    print("Successfully loaded pretrained weights for mouse Borzoi from WandB")
+                    print(f"Loaded Borzoi mouse rep{replicate} weights from HuggingFace "
+                          f"(Genentech/borzoi-model)")
 
                     needs_mask_channel = True
 
                 except Exception as e:
-                    print(f"Error loading pretrained weights from WandB: {e}")
+                    print(f"Error loading Borzoi mouse weights from HuggingFace: {e}")
                     raise RuntimeError(f"Pretrained weight loading failed: {e}") from e
             elif pretrained_source == "local" and checkpoint_path:
                 try:

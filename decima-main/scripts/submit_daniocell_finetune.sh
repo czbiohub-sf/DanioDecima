@@ -50,7 +50,7 @@ JOB_ID=$(sbatch --parsable <<EOF
 
 # Load environment
 module load anaconda
-source activate pytorch
+source activate gReLu
 
 # Environment setup — all in scratch
 export GENOMEPY_CACHE_DIR="${BASE_DIR}/genomepy_cache/job_\${SLURM_ARRAY_JOB_ID}_task_\${SLURM_ARRAY_TASK_ID}"

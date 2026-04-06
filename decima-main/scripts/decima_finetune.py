@@ -34,7 +34,7 @@ def train_single_experiment(config):
     
     # Set up paths
     src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
-    sys.path.append(src_dir)
+    sys.path.insert(0, src_dir)  # before installed lightning pkg
     
     # Import modules
     from read_hdf5 import HDF5Dataset

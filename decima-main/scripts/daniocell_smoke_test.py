@@ -48,7 +48,7 @@ EXPECTED_PAD_LEN  = 534288  # seq_len + 2*pad = 524288 + 10000
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 _src = os.path.join(os.path.dirname(__file__), "..", "src", "decima")
-sys.path.append(os.path.abspath(_src))
+sys.path.insert(0, os.path.abspath(_src))  # insert before installed 'lightning' package
 
 
 def _header(n, title):

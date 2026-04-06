@@ -69,6 +69,12 @@ print(chrom_split_tab)
 
 # Assign each chromosome to the split that contains the most of its genes
 chrom_to_split = chrom_split_tab.idxmax(axis=1).to_dict()
+
+# Zebrahub stores chromosomes without 'chr' prefix (e.g. '1','2',...);
+# DanioCell uses 'chr1','chr2',... — normalise the keys to match.
+if not any(k.startswith('chr') for k in chrom_to_split.keys()):
+    chrom_to_split = {f'chr{k}': v for k, v in chrom_to_split.items()}
+
 print("\nChromosome → dataset mapping:")
 for chrom in sorted(chrom_to_split.keys()):
     print(f"  {chrom}: {chrom_to_split[chrom]}")

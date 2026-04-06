@@ -129,9 +129,23 @@ n_matched = var_df['chrom'].notna().sum()
 print(f"Genes with GTF match: {n_matched} / {n_genes_before} ({n_matched/n_genes_before:.1%})")
 
 var_df = var_df[var_df['chrom'].notna()]
+
+# Reorder columns: grelu's check_intervals() requires chrom, start, end
+# as the FIRST 3 columns (checks df.columns[:3]). After a left-merge they
+# are appended behind pre-existing Seurat vst.* columns — fix that here.
+gtf_cols   = ['chrom', 'start', 'end', 'strand', 'gene_type']
+other_cols = [c for c in var_df.columns if c not in gtf_cols]
+var_df = var_df[gtf_cols + other_cols]
+
+# Ensure correct dtypes (int cols may upcast to float when NaN was present)
+var_df['chrom'] = var_df['chrom'].astype(str)
+var_df['start'] = var_df['start'].astype(int)
+var_df['end']   = var_df['end'].astype(int)
+
 ad = ad[:, var_df.index]
 ad.var = var_df
 print(f"Shape after dropping unmatched genes: {ad.shape}")
+print(f"First 3 var columns: {ad.var.columns[:3].tolist()}  (must be chrom, start, end)")
 
 # %% [markdown]
 # ## Set gene start/end/length

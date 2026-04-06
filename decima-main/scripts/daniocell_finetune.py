@@ -18,7 +18,7 @@ import torch
 import numpy as np
 import anndata
 import json
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import CSVLogger
 
 
 def set_all_seeds(seed):
@@ -81,7 +81,7 @@ def train_single_experiment(config):
 
     log_dir = os.path.join(config["log_dir"], exp_name)
     os.makedirs(log_dir, exist_ok=True)
-    logger = TensorBoardLogger(save_dir=log_dir, name="")
+    logger = CSVLogger(save_dir=log_dir, name="")
 
     train_params = {
         "optimizer": "adam",

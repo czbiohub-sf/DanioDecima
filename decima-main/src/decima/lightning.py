@@ -478,7 +478,9 @@ class LightningModel(pl.LightningModule):
             PyTorch Lightning Trainer
         """
         torch.set_float32_matmul_precision("medium")
-        
+        # Required for deterministic=True on CUDA >= 10.2 with CuBLAS ops
+        os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+
         # Set up logging
         logger = self.parse_logger()
 

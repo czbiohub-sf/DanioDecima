@@ -45,6 +45,7 @@ source activate gReLu
 
 export WANDB_CACHE_DIR="${BASE_DIR}/wandb_cache"
 export CUDA_VISIBLE_DEVICES=0
+export CUBLAS_WORKSPACE_CONFIG=":4096:8"
 mkdir -p \$WANDB_CACHE_DIR
 
 echo "Host:   \${HOSTNAME}"

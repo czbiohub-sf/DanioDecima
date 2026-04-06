@@ -377,6 +377,8 @@ def check_mini_training(n_batches, skip_pretrained):
         deterministic=True,
     )
 
+    # Required for deterministic=True on CUDA >= 10.2 with CuBLAS ops
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
     pl.seed_everything(42, workers=True)
 
     try:

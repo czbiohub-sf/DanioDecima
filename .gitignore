@@ -29,3 +29,8 @@
 *requirements.txt**/.ipynb_checkpoints/
 gReLU/
 **/**/**/.ipynb_checkpoints/
+
+# Slides / generated artifacts
+*.pptx
+docs/slides/
+scripts/generate_slides*.py

@@ -57,7 +57,7 @@ def compute_marker_metrics(marker_df, key='cell_type', tp_cutoff=1):
         n_positive = np.sum(labels)
 
         if n_positive == len(labels) or n_positive == 0:
-            auprc, auroc = np.nan
+            auprc, auroc = np.nan, np.nan
         else:
             auprc = average_precision_score(labels, curr_marker_df['score_pred'])
             auroc = roc_auc_score(labels, curr_marker_df['score_pred'])

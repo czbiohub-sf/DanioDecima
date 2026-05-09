@@ -9,7 +9,7 @@ from tqdm import tqdm
 import argparse
 
 src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
-sys.path.append(src_dir)
+sys.path.insert(0, src_dir)  # before installed lightning pkg
 
 from read_hdf5 import GeneForecastDataset, list_genes
 from lightning_temporal import JointLightningModel

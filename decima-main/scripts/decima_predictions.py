@@ -38,7 +38,7 @@ data_params = ckpt['hyper_parameters'].get('data_params', {})
 
 #load decima-specific code
 src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
-sys.path.append(src_dir)
+sys.path.insert(0, src_dir)  # before installed lightning pkg
 from read_hdf5 import HDF5Dataset, list_genes
 from lightning import LightningModel
 

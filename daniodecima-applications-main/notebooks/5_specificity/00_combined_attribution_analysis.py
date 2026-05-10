@@ -35,7 +35,7 @@ train_params = ckpt['hyper_parameters']['train_params']
 data_params = ckpt['hyper_parameters'].get('data_params', {})
 
 # Add Decima to path
-sys.path.append('/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/src/decima/')
+sys.path.append('/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/')
 from lightning import LightningModel
 from interpret import extract_gene_data
 from captum.attr import InputXGradient

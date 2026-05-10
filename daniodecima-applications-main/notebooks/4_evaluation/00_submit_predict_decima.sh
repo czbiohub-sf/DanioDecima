@@ -53,5 +53,5 @@ out_file="/hpc/scratch/group.data.science/yang-joon.kim/zebrahub-decima/experime
 # out_file="${ckpt_dir}/data_out_decima_${experiment_name}_${today}_${model_id}.h5ad"
 echo "Output file will be: $out_file"
 
-python /hpc/projects/data.science/yangjoon.kim/step/decima-main/scripts/decima_predictions.py \
+python /hpc/projects/data.science/yangjoon.kim/step/daniodecima-main/scripts/decima_predictions.py \
   --device 0 --ckpts $ckpts --h5_file $h5_file --matrix_file $matrix_file --out_file $out_file --max_seq_shift 3

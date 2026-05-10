@@ -28,7 +28,7 @@ echo "Results directory: $RESULTS_DIR"
 echo "Output directory: $OUTPUT_DIR"
 
 # Run the enhanced analysis with ISM weight percentiles and specificity filtering
-python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/02_summarize_results_spec.py \
+python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/02_summarize_results_spec.py \
     --results_dir "$RESULTS_DIR" \
     --output_dir "$OUTPUT_DIR" \
     --min_specificity 0.5 \

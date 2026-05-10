@@ -683,7 +683,7 @@ def statistical_analysis(predictions, targets, metadata):
 #SBATCH --time=24:00:00
 
 module load anaconda
-cd /code/decima-applications-main/notebooks/
+cd /code/daniodecima-applications-main/notebooks/
 python script_name.py
 ```
 

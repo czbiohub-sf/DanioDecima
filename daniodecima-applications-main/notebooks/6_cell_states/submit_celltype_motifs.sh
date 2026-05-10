@@ -27,10 +27,10 @@ module load anaconda/latest
 
 # Set up paths
 BASE_DIR="/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima"
-SCRIPT_DIR="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/6_cell_states"
+SCRIPT_DIR="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/6_cell_states"
 OUTPUT_BASE="${BASE_DIR}/celltype_motif_analysis_job_${SLURM_ARRAY_JOB_ID}_task_${SLURM_ARRAY_TASK_ID}"
 DATA_DIR="${BASE_DIR}/data/celltypes_chrom_split_v1"
-MEME_FILE="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/JASPAR2020_CORE_vertebrates_non-redundant_pfms.meme"
+MEME_FILE="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/JASPAR2020_CORE_vertebrates_non-redundant_pfms.meme"
 
 # Data files
 H5_FILE="${DATA_DIR}/data.h5"

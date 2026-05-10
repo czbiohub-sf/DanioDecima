@@ -4,7 +4,7 @@
 BASE_DIR="/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima"
 LOG_BASE="${BASE_DIR}/experiments"
 DATA_DIR="/hpc/projects/data.science/yangjoon.kim/zebrafish-seq2func-data/celltypes_chrom_split_v1/"
-SCRIPT_DIR="/hpc/projects/data.science/yangjoon.kim/step/decima-main/scripts"
+SCRIPT_DIR="/hpc/projects/data.science/yangjoon.kim/step/daniodecima-main/scripts"
 
 # Create base directories
 mkdir -p ${LOG_BASE}

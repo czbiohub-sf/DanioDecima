@@ -135,7 +135,7 @@ echo "========================================"
 
 # Step 1: Evolution
 echo "STEP 1: RUNNING EVOLUTION..."
-python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/00_evolve_combined.py \
+python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/00_evolve_combined.py \
     --device 0 \
     --model_dir "$MODEL_DIR" \
     --data_dir "$DATA_DIR" \
@@ -188,7 +188,7 @@ else:
         
         # Step 2: Analysis
         echo "STEP 2: RUNNING ANALYSIS..."
-        python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/1_read_celltypes.py \
+        python /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/1_read_celltypes.py \
             --file_path "$EVOLVED_FILE" \
             --model_base_dir "$MODEL_DIR" \
             --data_dir "$DATA_DIR" \

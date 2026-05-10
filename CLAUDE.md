@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a machine learning research repository containing **Decima**, a deep learning framework for predicting single-cell RNA-seq data from genomic DNA sequences. The repository consists of two main components:
 
-- **decima-main/**: Core Python package implementing the Decima model
-- **decima-applications-main/**: Jupyter notebooks and analysis scripts for experiments and applications
+- **daniodecima-main/**: Core Python package implementing the Decima model
+- **daniodecima-applications-main/**: Jupyter notebooks and analysis scripts for experiments and applications
 
 ## Environment Setup
 
@@ -20,7 +20,7 @@ All .ipynb notebook files have been converted to .py format using jupytext. The 
 
 ## Core Architecture
 
-### Decima Model (decima-main/)
+### Decima Model (daniodecima-main/)
 - **Base**: Built on Borzoi model architecture with 5-channel input (4 DNA + 1 gene mask)
 - **Sequence Length**: 524,288bp input, cropped to 5,120bp 
 - **Architecture**: 7 CNN blocks + 8 Transformer blocks → 1,920 embedding channels
@@ -39,7 +39,7 @@ All .ipynb notebook files have been converted to .py format using jupytext. The 
 
 ### Testing
 ```bash
-cd decima-main/
+cd daniodecima-main/
 pytest
 # Or with coverage:
 pytest --cov decima --cov-report term-missing --verbose
@@ -47,7 +47,7 @@ pytest --cov decima --cov-report term-missing --verbose
 
 ### Building
 ```bash
-cd decima-main/
+cd daniodecima-main/
 # Clean previous builds
 python -c 'import shutil; [shutil.rmtree(p, True) for p in ("build", "dist", "docs/_build")]'
 # Build package
@@ -56,14 +56,14 @@ python -m build
 
 ### Code Quality
 ```bash
-cd decima-main/
+cd daniodecima-main/
 # Run flake8 (configured for line length 88, Black-compatible)
 flake8 src/
 ```
 
 ### Documentation
 ```bash
-cd decima-main/
+cd daniodecima-main/
 # Build docs
 sphinx-build --color -b html -d "docs/_build/doctrees" "docs" "docs/_build/html"
 # Check for broken links
@@ -72,7 +72,7 @@ sphinx-build --color -b linkcheck -d "docs/_build/doctrees" "docs" "docs/_build/
 
 ## Analysis Workflows
 
-The notebooks in `decima-applications-main/notebooks/` follow a structured pipeline:
+The notebooks in `daniodecima-applications-main/notebooks/` follow a structured pipeline:
 
 1. **0_sc_data_prep/**: Single-cell data preprocessing for different tissues
 2. **1_processing/**: Atlas generation and data aggregation
@@ -126,7 +126,7 @@ The codebase is designed for HPC environments with SLURM job submission scripts 
 ## Package Structure
 
 ```
-decima-main/
+daniodecima-main/
 ├── src/decima/          # Core package code
 ├── scripts/             # Training and prediction scripts  
 ├── tests/               # Test suite

@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 # Add paths
-sys.path.append('/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/src/decima/')
+sys.path.append('/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/')
 from lightning import LightningModel
 from evaluate import marker_zscores
 from interpret import attributions as get_attr

@@ -22,7 +22,7 @@ export NCCL_DEBUG=INFO
 export PYTHONFAULTHANDLER=1
 
 # Set variables
-scripts_dir="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts"
+scripts_dir="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/scripts"
 save_dir="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/data/"
 lr=3e-5
 weight=1e-4

@@ -92,7 +92,7 @@ def load_model(checkpoint_path, device):
     import grelu.sequence.utils
 
     # Add decima source to path
-    src_dir = '/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/src/decima/'
+    src_dir = '/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/'
     sys.path.insert(0, src_dir)
     from lightning import LightningModel
     

@@ -39,7 +39,7 @@ If your filenames differ, edit the variables “matrix_file” and “h5_file”
 
 - DATA_DIR = /hpc/projects/data.science/yangjoon.kim/zebrafish-seq2func-data/celltypes_chrom_split_v1/
 
-- SCRIPT_DIR = /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts
+- SCRIPT_DIR = /hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/scripts
 
 2.  Submit the array job:
 
@@ -112,8 +112,8 @@ Adjust as needed for your system.
 # Requirements
 
 - Set up the custom pytorch environment, as described:
-  - decima-applications-main/notebooks/6_cell_states/README_analysis_TF-MoDISco.md
-  - decima-applications-main/notebooks/6_cell_states/environment_pytorch.yml
+  - daniodecima-applications-main/notebooks/6_cell_states/README_analysis_TF-MoDISco.md
+  - daniodecima-applications-main/notebooks/6_cell_states/environment_pytorch.yml
 
 - Python libraries: torch, pytorch-lightning, anndata, numpy, h5py, argparse
 

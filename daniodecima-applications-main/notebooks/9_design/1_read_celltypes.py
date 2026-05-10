@@ -149,7 +149,7 @@ def load_model(checkpoint_path, device):
         log_progress("✓ grelu modules imported")
 
         # Add decima source to path
-        src_dir = '/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/src/decima/'
+        src_dir = '/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/'
         sys.path.insert(0, src_dir)
         log_progress(f"✓ Added decima path: {src_dir}")
         
@@ -557,7 +557,7 @@ def perform_tf_analysis(sequence, ism_results, target_celltype, timepoint, task_
         from grelu.interpret.motifs import scan_sequences
         
         # motif file path
-        motif_file_path = "/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/JASPAR2020_CORE_vertebrates_non-redundant_pfms.meme"
+        motif_file_path = "/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/JASPAR2020_CORE_vertebrates_non-redundant_pfms.meme"
         
         # Scan for motifs
         scan = scan_sequences(

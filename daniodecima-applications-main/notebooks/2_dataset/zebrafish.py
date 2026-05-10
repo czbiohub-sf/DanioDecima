@@ -21,7 +21,7 @@ import wandb
 import importlib.util
 
 # Get the full path to the module
-module_path = '/hpc/mydata/mathias.voges/Projects/research/zf-decima/decima-main/src/decima/read_hdf5.py'
+module_path = '/hpc/mydata/mathias.voges/Projects/research/zf-decima/daniodecima-main/src/decima/read_hdf5.py'
 
 # Load the module
 spec = importlib.util.spec_from_file_location("read_hdf5", module_path)

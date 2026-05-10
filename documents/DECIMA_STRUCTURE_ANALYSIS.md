@@ -4,7 +4,7 @@
 
 ```
 step/
-├── decima-main/                          # Core Decima Package
+├── daniodecima-main/                          # Core Decima Package
 │   ├── src/decima/                       # Main source code
 │   │   ├── decima_model.py              # [CORE] DecimaModel class (Borzoi wrapper)
 │   │   ├── lightning.py                 # [CORE] PyTorch Lightning training
@@ -29,7 +29,7 @@ step/
 │   ├── tests/                           # Test suite
 │   └── docs/                            # Documentation
 │
-├── decima-applications-main/            # Research Applications
+├── daniodecima-applications-main/            # Research Applications
 │   └── notebooks/                       # Analysis pipeline
 │       ├── 0_sc_data_prep/             # [STAGE 0] Pseudobulk preparation
 │       │   ├── bca_prep.py             # Brain Cell Atlas
@@ -116,7 +116,7 @@ step/
 
 ## 2. CORE DEPENDENCY MAP
 
-### Internal Dependencies (decima-main/)
+### Internal Dependencies (daniodecima-main/)
 
 ```mermaid
 graph TD
@@ -174,7 +174,7 @@ graph LR
     D --> I[8_disease]
     D --> J[9_design]
     
-    K[decima-main/src/] --> D
+    K[daniodecima-main/src/] --> D
     K --> E
     K --> F
     K --> G
@@ -213,7 +213,7 @@ graph TD
     E --> J[8_disease: Disease]
     E --> K[9_design: Evolution]
     
-    L[decima-main/] --> E
+    L[daniodecima-main/] --> E
     L --> F
     L --> G
     L --> H
@@ -225,7 +225,7 @@ graph TD
 ## 5. KEY ARCHITECTURAL PATTERNS
 
 ### 1. Core-Application Separation
-- **decima-main/**: Reusable ML framework
+- **daniodecima-main/**: Reusable ML framework
 - **applications/**: Research-specific analyses
 
 ### 2. Sequential Pipeline

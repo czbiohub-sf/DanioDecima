@@ -13,7 +13,7 @@
 # ---
 
 # %%
-scripts_dir = 'research/zf-decima/decima-main/scripts'
+scripts_dir = 'research/zf-decima/daniodecima-main/scripts'
 save_dir="/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima/"
 
 # %%

@@ -48,13 +48,13 @@ DanioDecima extends the Borzoi architecture to predict cell-type-specific gene e
 ## Repository Structure
 
 ```
-decima-applications-main/notebooks/
+daniodecima-applications-main/notebooks/
 ├── 2_dataset/           # Data exploration and preprocessing
 ├── 4_evaluation/        # Model evaluation and performance analysis
 ├── 5_specificity/       # Attribution analysis pipeline
 └── 9_design/           # Regulatory element design workflows
 
-decima-main/scripts/
+daniodecima-main/scripts/
 ├── decima_finetune.py          # Model training
 ├── decima_predictions.py       # Prediction generation
 └── submit_*.sh                 # SLURM job submission scripts
@@ -72,22 +72,22 @@ decima-main/scripts/
 
 ### Model Training
 ```bash
-sbatch decima-main/scripts/submit_decima_finetune.sh
+sbatch daniodecima-main/scripts/submit_decima_finetune.sh
 ```
 
 ### Generate Predictions
 ```bash
-sbatch decima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh
+sbatch daniodecima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh
 ```
 
 ### Attribution Analysis
 ```bash
-sbatch decima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh
+sbatch daniodecima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh
 ```
 
 ### Regulatory Element Design
 ```bash
-sbatch decima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh
+sbatch daniodecima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh
 ```
 
 ## Citation
@@ -143,7 +143,7 @@ Before making this repository public or submitting to a conference, address the 
   - Shell: `submit_decima.sh:25-26`, `submit_decima_finetune.sh:4-7`
   - Notebooks: all directories (0_sc_data_prep through 9_design)
 - [ ] **Fix sys.path hacks**: `lightning.py`, `lightning_temporal.py`, `interpret.py` manipulate `sys.path` instead of using proper relative imports
-- [ ] **Populate `install_requires`** in `decima-main/setup.cfg` (currently empty; 15+ undeclared dependencies)
+- [ ] **Populate `install_requires`** in `daniodecima-main/setup.cfg` (currently empty; 15+ undeclared dependencies)
 - [ ] **Standardize seed handling** across scripts (currently inconsistent: some hardcode 0, some are configurable, some omit seeds entirely)
 
 ### Correctness

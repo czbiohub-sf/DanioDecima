@@ -46,7 +46,7 @@ ckpts
 out_file = os.path.join(save_dir, "data_out_decima_v20250319_pretrained_rep0_forecast_horizon_7_lstm.h5ad")
 
 # %%
-CMD = f"python /hpc/mydata/mathias.voges/Projects/research/zf-decima/decima-main/scripts/predict_genes_temporal.py --device 1 --ckpts {' '.join(ckpts)} --h5_file {h5_file}  --matrix_file {matrix_file} --out_file {out_file} --max_seq_shift 3"
+CMD = f"python /hpc/mydata/mathias.voges/Projects/research/zf-decima/daniodecima-main/scripts/predict_genes_temporal.py --device 1 --ckpts {' '.join(ckpts)} --h5_file {h5_file}  --matrix_file {matrix_file} --out_file {out_file} --max_seq_shift 3"
 print(CMD)
 
 # %%

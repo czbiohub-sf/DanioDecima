@@ -13,7 +13,7 @@
 # Create logs directory if it doesn't exist
 mkdir -p /hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/logs
 
-PYTHON_SCRIPT="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/5_specificity/00_combined_attribution_analysis.py"
+PYTHON_SCRIPT="/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/5_specificity/00_combined_attribution_analysis.py"
 
 declare -a PAIRS=(
 "Human_Decima_0|/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/experiments/decima_experiments_20250618_111138/pretrained_decima-human_rep0_lr3e-05_seed42/version_0"

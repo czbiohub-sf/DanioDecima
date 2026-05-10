@@ -8,14 +8,14 @@ This document provides a comprehensive analysis of the Decima repository structu
 
 The repository is organized into two main components:
 
-### **decima-main/** - Core Framework (17 Python modules)
+### **daniodecima-main/** - Core Framework (17 Python modules)
 - **Core Model**: DecimaModel (Borzoi-based architecture with gene masking)
 - **Training**: PyTorch Lightning framework with custom loss functions
 - **Data**: HDF5-based data loading and preprocessing utilities
 - **Analysis**: Attribution, evaluation, and visualization tools
 - **Scripts**: Training, prediction, and experimental pipelines
 
-### **decima-applications-main/notebooks/** - Research Pipeline (100+ Python scripts)
+### **daniodecima-applications-main/notebooks/** - Research Pipeline (100+ Python scripts)
 - **10-stage sequential pipeline** (Stages 0-9)
 - **50+ analysis notebooks** converted to Python scripts
 - **Complete workflow** from raw single-cell data to regulatory element design
@@ -24,7 +24,7 @@ The repository is organized into two main components:
 
 ### Core Dependencies Flow
 ```
-External Libraries → decima-main/src/ → decima-applications-main/notebooks/
+External Libraries → daniodecima-main/src/ → daniodecima-applications-main/notebooks/
      ↓                    ↓                         ↓
 - torch/lightning    - Model classes         - Analysis scripts
 - grelu             - Data loaders          - Research workflows  
@@ -224,12 +224,12 @@ pip install jupytext
 find . -name "*.ipynb" -exec jupytext --to py {} \;
 
 # 2. Core package development
-cd decima-main/
+cd daniodecima-main/
 pytest  # Run tests
 python -m build  # Build package
 
 # 3. Analysis pipeline
-cd ../decima-applications-main/notebooks/
+cd ../daniodecima-applications-main/notebooks/
 python 0_sc_data_prep/bca_prep.py  # Start pipeline
 ```
 

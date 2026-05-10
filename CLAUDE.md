@@ -49,7 +49,7 @@ pytest --cov decima --cov-report term-missing --verbose
 ```bash
 cd daniodecima-main/
 # Clean previous builds
-python -c 'import shutil; [shutil.rmtree(p, True) for p in ("build", "dist", "docs/_build")]'
+python -c 'import shutil; [shutil.rmtree(p, True) for p in ("build", "dist")]'
 # Build package
 python -m build
 ```
@@ -61,34 +61,24 @@ cd daniodecima-main/
 flake8 src/
 ```
 
-### Documentation
-```bash
-cd daniodecima-main/
-# Build docs
-sphinx-build --color -b html -d "docs/_build/doctrees" "docs" "docs/_build/html"
-# Check for broken links
-sphinx-build --color -b linkcheck -d "docs/_build/doctrees" "docs" "docs/_build/linkcheck"
-```
-
 ## Analysis Workflows
 
-The notebooks in `daniodecima-applications-main/notebooks/` follow a structured pipeline:
+The notebooks in `daniodecima-applications-main/notebooks/` follow a structured pipeline (zebrafish-specific):
 
-1. **0_sc_data_prep/**: Single-cell data preprocessing for different tissues
-2. **1_processing/**: Atlas generation and data aggregation
-3. **2_dataset/**: Training dataset creation (intervals, splits, HDF5 generation)
-4. **3_training/**: Model fine-tuning and training scripts
-5. **4_evaluation/**: Model prediction and evaluation
-6. **5_specificity/**: Cell-type specificity analysis and attribution calculations
-7. **6_cell_states/**: Cell state analysis including modisco motif analysis
-8. **7_eqtls/**: eQTL analysis and genetic variant effects
-9. **8_disease/**: Disease-associated variant analysis
-10. **9_design/**: Regulatory element design via directed evolution
+1. **0_sc_data_prep/**: Zebrafish single-cell data preprocessing (`zf-prep.{ipynb,py}`)
+2. **2_dataset/**: Zebrafish training dataset creation (intervals, splits, HDF5)
+3. **3_training/**: Model fine-tuning (adapted from upstream)
+4. **4_evaluation/**: Model prediction and evaluation
+5. **5_specificity/**: Cell-type specificity analysis and combined attribution analysis
+6. **6_cell_states/**: TF-MoDISco cell-type motif attribution
+7. **9_design/**: Directed-evolution design of cell-type-specific zebrafish regulatory elements
+
+(Upstream's `1_processing/`, `7_eqtls/`, and `8_disease/` directories were not used in the DanioDecima work and were removed. See upstream Genentech/decima-applications for those analyses.)
 
 ## Common Patterns
 
 ### Model Initialization
-- Pretrained weights loaded via WandB (human/mouse Borzoi models)
+- Pretrained weights loaded via HuggingFace (Genentech/borzoi-model) or local checkpoints
 - Support for Decima checkpoints and random initialization
 - Xavier, Kaiming, or zeros initialization options
 
@@ -127,10 +117,10 @@ The codebase is designed for HPC environments with SLURM job submission scripts 
 
 ```
 daniodecima-main/
-├── src/decima/          # Core package code
-├── scripts/             # Training and prediction scripts  
-├── tests/               # Test suite
-├── docs/                # Sphinx documentation
+├── src/decima/          # Core package code (forked from Genentech/decima; package import name retained as `decima` for compatibility)
+├── scripts/             # Training and prediction scripts
+├── tests/               # Test suite (currently a stub)
 ├── setup.cfg            # Package configuration
-└── pyproject.toml       # Build system configuration
+├── pyproject.toml       # Build system configuration
+└── LICENSE.txt          # Genentech Non-Commercial Software License v1.0 (inherited from upstream)
 ```

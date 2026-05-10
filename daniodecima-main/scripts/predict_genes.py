@@ -1,3 +1,8 @@
+# Modified from the original Genentech/decima source by the DanioDecima authors
+# (Chan Zuckerberg Biohub) on 2026-05-10. See daniodecima-main/FORK_NOTES.md for the scope of
+# modifications. Original copyright Genentech, Inc., 2024 (Genentech Non-Commercial
+# Software License v1.0).
+
 # Given an hdf5 file created by write_hdf5.py, make predictions for all the genes
 
 import numpy as np

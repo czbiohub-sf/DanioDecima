@@ -1,3 +1,8 @@
+# Modified from the original Genentech/decima source by the DanioDecima authors
+# (Chan Zuckerberg Biohub) on 2026-05-10. See daniodecima-main/FORK_NOTES.md for the scope of
+# modifications. Original copyright Genentech, Inc., 2024 (Genentech Non-Commercial
+# Software License v1.0).
+
 import numpy as np
 import pandas as pd
 import plotnine as p9

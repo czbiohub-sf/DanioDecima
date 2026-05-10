@@ -1,0 +1,45 @@
+DanioDecima — Notice
+====================
+
+This work builds on the following upstream projects, datasets, and models.
+Please cite the originals when using or redistributing this repository.
+
+Decima
+------
+Lal, A. et al. (2024). "Decoding sequence determinants of gene expression
+in diverse cellular and disease states." bioRxiv. doi:[bioRxiv ID]
+Repository: https://github.com/Genentech/decima
+License:    Genentech Non-Commercial Software License v1.0
+
+Decima-applications
+-------------------
+Repository: https://github.com/Genentech/decima-applications
+License:    Genentech Non-Commercial Software License v1.0
+
+Borzoi
+------
+Linder, J. et al. (2023). "Predicting RNA-seq coverage from DNA sequence
+as a unifying model of gene regulation." bioRxiv. doi:[bioRxiv ID]
+Repository: https://github.com/calico/borzoi
+Pretrained weights (used in this work): Genentech/borzoi-model on HuggingFace
+                                        (https://huggingface.co/Genentech/borzoi-model)
+
+ZebraHub (zebrafish single-cell developmental atlas)
+----------------------------------------------------
+Lange, M. et al. (2024). "A multimodal zebrafish developmental atlas
+reveals the state-transition dynamics of late-vertebrate pluripotent
+axial progenitors." Cell 187(23): 6742–6759.
+Atlas:    https://zebrahub.org
+
+DanioDecima
+-----------
+Voges, M. et al. (2025). "DanioDecima: A DNA sequence-to-function model
+of zebrafish embryogenesis." (In preparation.)
+Repository: https://github.com/czbiohub-sf/DanioDecima
+
+Acknowledgements
+----------------
+The Decima codebase was developed by the gReLU/Genentech team. Borzoi was
+developed by Calico and Genentech. ZebraHub was developed at the Chan
+Zuckerberg Biohub. We thank the upstream authors for releasing their
+work openly under the Genentech Non-Commercial Software License.

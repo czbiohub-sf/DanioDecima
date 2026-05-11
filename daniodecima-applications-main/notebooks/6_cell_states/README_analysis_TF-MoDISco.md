@@ -31,7 +31,7 @@ conda env create -f environment_modisco.yml
 
 Please include the following to these environments manually:
 -  `grelu`, a custom genomics package. Install from source here: https://github.com/Genentech/gReLU
-- The Decima and Decima-applications directories are found in the STEP repo on the CZ Biohub SF Github: https://github.com/czbiohub-sf/step
+- The Decima and Decima-applications directories are found in the STEP repo on the CZ Biohub SF Github: https://github.com/czbiohub-sf/DanioDecima
 
 ### Environment Testing
 

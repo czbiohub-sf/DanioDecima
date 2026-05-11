@@ -195,7 +195,7 @@ I recommend Option A for speed, Option B if there's appetite. The user should de
 
 ## 4 · Critical review: Avantika Lal lens (upstream Decima author)
 
-If I were Avantika Lal browsing `czbiohub-sf/step` after it goes public, here's what I'd notice in the first 5 minutes:
+If I were Avantika Lal browsing `czbiohub-sf/DanioDecima` after it goes public, here's what I'd notice in the first 5 minutes:
 
 1. **"Why is most of my code in here verbatim?"** Two whole subdirectories of decima-applications (`7_eqtls/`, `8_disease/`) are byte-identical copies of my work. There is no zebrafish-specific eQTL or disease analysis here — yet you've republished my notebooks. **A fork should contain your novelty plus the modifications you needed; pristine upstream files should be removed and the upstream pinned as a dependency, or at minimum, the README should clearly say "these dirs are unchanged from upstream and are kept only so the data-prep pipeline runs end-to-end".**
 

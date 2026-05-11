@@ -26,6 +26,14 @@
 *.fa
 *.fasta
 *error.txt
-*requirements.txt**/.ipynb_checkpoints/
+*requirements.txt
+**/.ipynb_checkpoints/
 gReLU/
 **/**/**/.ipynb_checkpoints/
+
+# Internal Claude-generated repo analyses (not for publication).
+# If you need to commit one for publication, override with `git add -f`.
+documents/DECIMA_*.md
+documents/ANALYSIS_*.md
+documents/TRAINING_*.md
+documents/daniocell_*.md

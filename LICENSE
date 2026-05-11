@@ -1,28 +1,45 @@
-BSD 3-Clause License
+DanioDecima — License
+=====================
 
-Copyright (c) 2023, Chan Zuckerberg Biohub
+This repository is a derivative work of two Genentech projects:
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  - Genentech/decima              (https://github.com/Genentech/decima)
+  - Genentech/decima-applications (https://github.com/Genentech/decima-applications)
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+Both upstream projects are licensed under the Genentech Non-Commercial
+Software License Version 1.0 (September 2022). Because this repository
+contains modified versions of code from those projects and depends on
+them at runtime, the entire repository — including new files contributed
+by Chan Zuckerberg Biohub — is licensed under the same terms.
 
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+Full license text:
+  daniodecima-main/LICENSE.txt              (verbatim from upstream Decima)
+  daniodecima-applications-main/LICENSE.txt (verbatim from upstream decima-applications)
 
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
+The Genentech Non-Commercial Software License is based on Apache License,
+Version 2.0, with an added restriction against Commercial Use as defined
+in §1 of the license. In particular, the license prohibits use of this
+software in the discovery, research, pre-clinical or clinical development,
+or related manufacturing of diagnostic, prognostic, prophylactic, or
+therapeutic treatments. Please read the full license text before use.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Modifications and additions
+---------------------------
+Per Genentech NC §4 (Redistribution), modified files in this repository
+carry prominent change-notices stating that they were modified by the
+DanioDecima authors. Per-fork modification summaries are documented in:
+
+  daniodecima-main/FORK_NOTES.md
+  daniodecima-applications-main/FORK_NOTES.md
+
+Attribution and citations are listed in NOTICE at the repository root.
+
+Copyright
+---------
+Copyright (c) 2024 Genentech, Inc. (upstream Decima and decima-applications)
+Copyright (c) 2025 Chan Zuckerberg Biohub (DanioDecima modifications and additions)
+
+Each upstream-pristine file retains its original Genentech copyright header.
+Each modified file carries both the original Genentech copyright header and a
+DanioDecima change-notice. New files added by Chan Zuckerberg Biohub carry
+their own copyright header.

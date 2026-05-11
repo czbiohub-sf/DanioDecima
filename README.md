@@ -48,13 +48,13 @@ DanioDecima extends the Borzoi architecture to predict cell-type-specific gene e
 ## Repository Structure
 
 ```
-decima-applications-main/notebooks/
+daniodecima-applications-main/notebooks/
 ├── 2_dataset/           # Data exploration and preprocessing
 ├── 4_evaluation/        # Model evaluation and performance analysis
 ├── 5_specificity/       # Attribution analysis pipeline
 └── 9_design/           # Regulatory element design workflows
 
-decima-main/scripts/
+daniodecima-main/scripts/
 ├── decima_finetune.py          # Model training
 ├── decima_predictions.py       # Prediction generation
 └── submit_*.sh                 # SLURM job submission scripts
@@ -72,22 +72,22 @@ decima-main/scripts/
 
 ### Model Training
 ```bash
-sbatch decima-main/scripts/submit_decima_finetune.sh
+sbatch daniodecima-main/scripts/submit_decima_finetune.sh
 ```
 
 ### Generate Predictions
 ```bash
-sbatch decima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh
+sbatch daniodecima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh
 ```
 
 ### Attribution Analysis
 ```bash
-sbatch decima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh
+sbatch daniodecima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh
 ```
 
 ### Regulatory Element Design
 ```bash
-sbatch decima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh
+sbatch daniodecima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh
 ```
 
 ## Citation
@@ -128,6 +128,39 @@ sbatch decima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh
   year={2025}
 }
 ```
+
+## Pre-Submission Checklist
+
+Before making this repository public or submitting to a conference, address the following:
+
+### Security
+- [ ] **Rotate WandB API keys**: Previously exposed keys in `scripts/finetune.py` and `scripts/finetune_temporal.py` have been removed from source but remain in git history. Rotate the affected key (`66d3a7...`) on the WandB dashboard (Settings > API keys) and scrub history with `git filter-repo` before making the repo public.
+
+### Reproducibility
+- [ ] **Remove hardcoded paths**: ~150+ hardcoded absolute paths across the codebase reference user-specific HPC directories (`/hpc/mydata/mathias.voges/`, `/home/karollua/`, `/home/gunsalul/`, `/hpc/scratch/.../yangjoon.kim/`, `/gstore/data/resbioai/`, `/code/decima/`). Replace with environment variables, config files, or CLI arguments. Priority files:
+  - Core library: `src/decima/decima_model.py:109`, `lightning.py:26`, `lightning_temporal.py:23`
+  - Scripts: `finetune.py:15`, `finetune_temporal.py:15`, `decima_finetune.py:44,167`
+  - Shell: `submit_decima.sh:25-26`, `submit_decima_finetune.sh:4-7`
+  - Notebooks: all directories (0_sc_data_prep through 9_design)
+- [ ] **Fix sys.path hacks**: `lightning.py`, `lightning_temporal.py`, `interpret.py` manipulate `sys.path` instead of using proper relative imports
+- [ ] **Populate `install_requires`** in `daniodecima-main/setup.cfg` (currently empty; 15+ undeclared dependencies)
+- [ ] **Standardize seed handling** across scripts (currently inconsistent: some hardcode 0, some are configurable, some omit seeds entirely)
+
+### Correctness
+- [ ] **Loss function epsilon**: `loss.py` defines `self.eps` but never uses it in `forward()` — division by zero and `log(0)` are unprotected (lines 34-35)
+- [ ] **Unreachable code**: `lightning.py:get_task_idxs` — the `invert` branch is after all return statements
+- [ ] **Early stopping overlap**: `00_evolve_combined.py:262-272` — comparison windows overlap
+
+### Code Quality
+- [ ] **Add test suite** (currently zero tests; `tests/conftest.py` is a stub)
+- [ ] **Remove dead code**: `02_summarize_results_designs_test.py` (~1200 commented lines), `lightning.py:281-341` (commented temporal smoothness)
+- [ ] **Fix bare `except` clauses**: `preprocess.py:228`, `setup.py:15`
+- [ ] **Update package metadata**: `setup.cfg` description is placeholder text; URL points to PyScaffold template
+
+### Documentation
+- [ ] **Update citation**: author list is "Voges, Mathias, et al." — needs full author list, venue, and year
+- [ ] **Fix path references** in `documents/DanioDecimaPipeline_README.md:209-237` (13 paths point to wrong user directory)
+- [ ] **Fix missing environment file**: `README_analysis_TF-MoDISco.md` references `environment_pytorch_full.yml` which does not exist
 
 ## License
 

@@ -209,31 +209,31 @@ This comprehensive design framework enables systematic generation of cell-type s
 ## **Key File Locations**
 
 ### Data Exploration and Preprocessing
-- **Data Exploration**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/2_dataset/zebrafish_data_exploration.ipynb`
+- **Data Exploration**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/2_dataset/zebrafish_data_exploration.ipynb`
 
 ### Model Training Pipeline
-- **Training Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts/decima_finetune.py`
-- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts/submit_decima_finetune.sh`
-- **Core Lightning Module**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/src/decima/lightning.py`
+- **Training Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/scripts/decima_finetune.py`
+- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/scripts/submit_decima_finetune.sh`
+- **Core Lightning Module**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/lightning.py`
 
 ### Prediction Generation
-- **Prediction Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-main/scripts/decima_predictions.py`
-- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh`
+- **Prediction Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/scripts/decima_predictions.py`
+- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/4_evaluation/00_submit_predict_decima.sh`
 
 ### Model Evaluation
-- **Evaluation Notebook**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/4_evaluation/01_evaluate_celltypes.ipynb`
+- **Evaluation Notebook**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/4_evaluation/01_evaluate_celltypes.ipynb`
 
 ### Attribution Analysis Pipeline
-- **Main Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/5_specificity/00_combined_attribution_analysis.py`
-- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh`
-- **Analysis Notebook**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/5_specificity/04_analyze_attributions_celltypes_decima.ipynb`
+- **Main Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/5_specificity/00_combined_attribution_analysis.py`
+- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/5_specificity/00_submit_combined_attributions.sh`
+- **Analysis Notebook**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/5_specificity/04_analyze_attributions_celltypes_decima.ipynb`
 
 ### Regulatory Element Design Pipeline
-- **Evolution Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/00_evolve_combined.py`
-- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh`
-- **Analysis Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/1_read_celltypes.py`
-- **Volcano Plots**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/designs_volcano_plot.ipynb`
-- **Clustering Analysis**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/decima-applications-main/notebooks/9_design/designs_clustering_analysis.ipynb`
+- **Evolution Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/00_evolve_combined.py`
+- **Submission Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/00_submit_evolve_combined.sh`
+- **Analysis Script**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/1_read_celltypes.py`
+- **Volcano Plots**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/designs_volcano_plot.ipynb`
+- **Clustering Analysis**: `/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-applications-main/notebooks/9_design/designs_clustering_analysis.ipynb`
 
 ---
 

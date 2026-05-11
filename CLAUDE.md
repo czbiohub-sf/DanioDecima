@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a machine learning research repository containing **Decima**, a deep learning framework for predicting single-cell RNA-seq data from genomic DNA sequences. The repository consists of two main components:
 
-- **decima-main/**: Core Python package implementing the Decima model
-- **decima-applications-main/**: Jupyter notebooks and analysis scripts for experiments and applications
+- **daniodecima-main/**: Core Python package implementing the Decima model
+- **daniodecima-applications-main/**: Jupyter notebooks and analysis scripts for experiments and applications
 
 ## Environment Setup
 
@@ -20,7 +20,7 @@ All .ipynb notebook files have been converted to .py format using jupytext. The 
 
 ## Core Architecture
 
-### Decima Model (decima-main/)
+### Decima Model (daniodecima-main/)
 - **Base**: Built on Borzoi model architecture with 5-channel input (4 DNA + 1 gene mask)
 - **Sequence Length**: 524,288bp input, cropped to 5,120bp 
 - **Architecture**: 7 CNN blocks + 8 Transformer blocks → 1,920 embedding channels
@@ -39,7 +39,7 @@ All .ipynb notebook files have been converted to .py format using jupytext. The 
 
 ### Testing
 ```bash
-cd decima-main/
+cd daniodecima-main/
 pytest
 # Or with coverage:
 pytest --cov decima --cov-report term-missing --verbose
@@ -47,48 +47,38 @@ pytest --cov decima --cov-report term-missing --verbose
 
 ### Building
 ```bash
-cd decima-main/
+cd daniodecima-main/
 # Clean previous builds
-python -c 'import shutil; [shutil.rmtree(p, True) for p in ("build", "dist", "docs/_build")]'
+python -c 'import shutil; [shutil.rmtree(p, True) for p in ("build", "dist")]'
 # Build package
 python -m build
 ```
 
 ### Code Quality
 ```bash
-cd decima-main/
+cd daniodecima-main/
 # Run flake8 (configured for line length 88, Black-compatible)
 flake8 src/
 ```
 
-### Documentation
-```bash
-cd decima-main/
-# Build docs
-sphinx-build --color -b html -d "docs/_build/doctrees" "docs" "docs/_build/html"
-# Check for broken links
-sphinx-build --color -b linkcheck -d "docs/_build/doctrees" "docs" "docs/_build/linkcheck"
-```
-
 ## Analysis Workflows
 
-The notebooks in `decima-applications-main/notebooks/` follow a structured pipeline:
+The notebooks in `daniodecima-applications-main/notebooks/` follow a structured pipeline (zebrafish-specific):
 
-1. **0_sc_data_prep/**: Single-cell data preprocessing for different tissues
-2. **1_processing/**: Atlas generation and data aggregation
-3. **2_dataset/**: Training dataset creation (intervals, splits, HDF5 generation)
-4. **3_training/**: Model fine-tuning and training scripts
-5. **4_evaluation/**: Model prediction and evaluation
-6. **5_specificity/**: Cell-type specificity analysis and attribution calculations
-7. **6_cell_states/**: Cell state analysis including modisco motif analysis
-8. **7_eqtls/**: eQTL analysis and genetic variant effects
-9. **8_disease/**: Disease-associated variant analysis
-10. **9_design/**: Regulatory element design via directed evolution
+1. **0_sc_data_prep/**: Zebrafish single-cell data preprocessing (`zf-prep.{ipynb,py}`)
+2. **2_dataset/**: Zebrafish training dataset creation (intervals, splits, HDF5)
+3. **3_training/**: Model fine-tuning (adapted from upstream)
+4. **4_evaluation/**: Model prediction and evaluation
+5. **5_specificity/**: Cell-type specificity analysis and combined attribution analysis
+6. **6_cell_states/**: TF-MoDISco cell-type motif attribution
+7. **9_design/**: Directed-evolution design of cell-type-specific zebrafish regulatory elements
+
+(Upstream's `1_processing/`, `7_eqtls/`, and `8_disease/` directories were not used in the DanioDecima work and were removed. See upstream Genentech/decima-applications for those analyses.)
 
 ## Common Patterns
 
 ### Model Initialization
-- Pretrained weights loaded via WandB (human/mouse Borzoi models)
+- Pretrained weights loaded via HuggingFace (Genentech/borzoi-model) or local checkpoints
 - Support for Decima checkpoints and random initialization
 - Xavier, Kaiming, or zeros initialization options
 
@@ -126,11 +116,11 @@ The codebase is designed for HPC environments with SLURM job submission scripts 
 ## Package Structure
 
 ```
-decima-main/
-├── src/decima/          # Core package code
-├── scripts/             # Training and prediction scripts  
-├── tests/               # Test suite
-├── docs/                # Sphinx documentation
+daniodecima-main/
+├── src/decima/          # Core package code (forked from Genentech/decima; package import name retained as `decima` for compatibility)
+├── scripts/             # Training and prediction scripts
+├── tests/               # Test suite (currently a stub)
 ├── setup.cfg            # Package configuration
-└── pyproject.toml       # Build system configuration
+├── pyproject.toml       # Build system configuration
+└── LICENSE.txt          # Genentech Non-Commercial Software License v1.0 (inherited from upstream)
 ```

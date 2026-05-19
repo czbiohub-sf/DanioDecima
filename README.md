@@ -162,6 +162,20 @@ Before making this repository public or submitting to a conference, address the 
 - [ ] **Fix path references** in `documents/DanioDecimaPipeline_README.md:209-237` (13 paths point to wrong user directory)
 - [ ] **Fix missing environment file**: `README_analysis_TF-MoDISco.md` references `environment_pytorch_full.yml` which does not exist
 
+## Project Status
+
+This project accompanies the DanioDecima manuscript (in preparation). It is maintained for reproducibility of the published results; critical bug fixes will be made as required. Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributing
+
+We warmly welcome contributions from the community! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started.
+
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to opensource@chanzuckerberg.com.
+
+## Reporting Security Issues
+
+If you believe you have found a security issue, please responsibly disclose by contacting us at security@chanzuckerberg.com. See [SECURITY.md](SECURITY.md) for details.
+
 ## License
 
-BSD-3-Clause license
+See [LICENSE.md](LICENSE.md). This repository is a derivative work of [Genentech/decima](https://github.com/Genentech/decima) and [Genentech/decima-applications](https://github.com/Genentech/decima-applications) and inherits their Non-Commercial Software License v1.0 (commercial use prohibited). Per-fork details are documented in `daniodecima-main/FORK_NOTES.md` and `daniodecima-applications-main/FORK_NOTES.md`. See [NOTICE](NOTICE) for upstream attribution and citation guidance.

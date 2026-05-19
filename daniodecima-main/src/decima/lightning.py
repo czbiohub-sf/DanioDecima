@@ -7,12 +7,10 @@
 The LightningModel class.
 """
 
-import warnings
 from datetime import datetime
 from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
-import pandas as pd
 import pytorch_lightning as pl
 import torch
 from einops import rearrange
@@ -23,8 +21,7 @@ from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 
 from grelu.lightning.metrics import MSE, PearsonCorrCoef
-from grelu.sequence.format import strings_to_one_hot
-from grelu.utils import get_aggfunc, get_compare_func, make_list
+from grelu.utils import make_list
 
 import os, sys
 sys.path.append(os.path.dirname(__file__))
@@ -32,8 +29,6 @@ sys.path.insert(0, '/code/decima/src/decima')
 
 from decima_model import DecimaModel
 from loss import TaskWisePoissonMultinomialLoss
-from read_hdf5 import VariantDataset
-from metrics import DiseaseLfcMSE
 
 
 default_train_params = {
@@ -50,127 +45,6 @@ default_train_params = {
     "weight_decay": 1e-4
 }
 
-def temporal_loss_grouped(y_pred, lambda_smooth=0.1, loss_type='l2', length_scale=2.0):
-    """
-    Calculate temporal loss for predictions, grouped by cell type.
-    Supports multiple loss types.
-    
-    Args:
-        y_pred: Tensor of shape [n_tasks] or [batch_size, n_tasks]
-        lambda_smooth: Weight for the smoothness loss
-        loss_type: Type of loss to use ('l1', 'l2', 'trend', 'gp')
-        length_scale: Length scale parameter for GP loss
-
-    Returns:
-        Temporal loss
-    """
-    total_loss = 0.0
-    total_pairs = 0
-    total_groups = 0
-
-    is_batched = len(y_pred.shape) > 1
-
-    index_groups = [[ 0,  6, 15, 25, 35, 45, 55, 65, 74, 84],
-               [ 1,  7, 16, 26, 36, 46, 56, 66, 75, 85],
-               [ 2, 10, 19, 29, 39, 49, 59, 69, 78, 88],
-               [ 3, 12, 22, 32, 42, 52, 62, 81, 91],
-               [ 4, 13, 23, 33, 43, 53, 63, 72, 82, 92],
-               [ 5, 14, 24, 34, 44, 54, 64, 73, 83, 93],
-               [ 8, 17, 27, 37, 47, 57, 67, 76, 86],
-               [ 9, 18, 28, 38, 48, 58, 68, 77, 87],
-               [11, 20, 30, 40, 50, 60, 70, 79, 89],
-               [21, 31, 41, 51, 61, 71, 80, 90]
-            ]
-    
-    # Group metadata by cell type
-    for indices in index_groups:
-        min_points = 3 if loss_type == 'trend' else 2
-        if len(indices) < min_points:
-            continue
-        
-        total_groups += 1
-        
-        # For GP loss, precompute the kernel
-        if loss_type == 'gp':
-            n = len(indices)
-            idx_tensor = torch.arange(n, device=y_pred.device).float()
-            i_grid, j_grid = torch.meshgrid(idx_tensor, idx_tensor, indexing='ij')
-            dist_matrix = torch.abs(i_grid - j_grid)
-            kernel = torch.exp(-(dist_matrix**2) / (2 * length_scale**2))
-        
-        if is_batched:
-            # For batched input: shape [batch_size, len(indices)]
-            group_preds = y_pred[:, indices]
-            
-            # Process each sample in the batch
-            for i in range(group_preds.shape[0]):
-                sample_preds = group_preds[i]
-                
-                if loss_type == 'l1':
-                    # L1 loss
-                    diffs = torch.abs(sample_preds[1:] - sample_preds[:-1])
-                    total_loss += diffs.sum()
-                    total_pairs += diffs.numel()
-                
-                elif loss_type == 'l2':
-                    # L2 loss
-                    diffs = sample_preds[1:] - sample_preds[:-1]
-                    total_loss += (diffs ** 2).sum()
-                    total_pairs += diffs.numel()
-                
-                elif loss_type == 'trend':
-                    # Trend consistency loss
-                    first_diffs = sample_preds[1:] - sample_preds[:-1]
-                    second_diffs = first_diffs[1:] - first_diffs[:-1]
-                    total_loss += torch.abs(second_diffs).sum()
-                    total_pairs += second_diffs.numel()
-                
-                elif loss_type == 'gp':
-                    # GP-inspired loss
-                    pred_diff_matrix = sample_preds.unsqueeze(0) - sample_preds.unsqueeze(1)
-                    weighted_diffs = kernel * (pred_diff_matrix**2)
-                    mask = torch.triu(torch.ones_like(weighted_diffs), diagonal=1)
-                    group_loss = (weighted_diffs * mask).sum()
-                    total_loss += group_loss
-                    # For GP loss, we count groups rather than pairs
-        else:
-            # For non-batched input: shape [len(indices)]
-            group_preds = y_pred[indices]
-            
-            if loss_type == 'l1':
-                diffs = torch.abs(group_preds[1:] - group_preds[:-1])
-                total_loss += diffs.sum()
-                total_pairs += diffs.numel()
-            
-            elif loss_type == 'l2':
-                diffs = group_preds[1:] - group_preds[:-1]
-                total_loss += (diffs ** 2).sum()
-                total_pairs += diffs.numel()
-            
-            elif loss_type == 'trend':
-                first_diffs = group_preds[1:] - group_preds[:-1]
-                second_diffs = first_diffs[1:] - first_diffs[:-1]
-                total_loss += torch.abs(second_diffs).sum()
-                total_pairs += second_diffs.numel()
-            
-            elif loss_type == 'gp':
-                pred_diff_matrix = group_preds.unsqueeze(0) - group_preds.unsqueeze(1)
-                weighted_diffs = kernel * (pred_diff_matrix**2)
-                mask = torch.triu(torch.ones_like(weighted_diffs), diagonal=1)
-                group_loss = (weighted_diffs * mask).sum()
-                total_loss += group_loss
-
-    # Return appropriate normalization based on loss type
-    if total_groups == 0:
-        return torch.tensor(0.0, device=y_pred.device)
-    
-    if loss_type == 'gp':
-        return lambda_smooth * total_loss / total_groups
-    else:
-        if total_pairs == 0:
-            return torch.tensor(0.0, device=y_pred.device)
-        return lambda_smooth * total_loss / total_pairs
-
 
 class LightningModel(pl.LightningModule):
     """
@@ -185,9 +59,14 @@ class LightningModel(pl.LightningModule):
     """
 
     def __init__(
-        self, model_params: dict, train_params: dict = {}, data_params: dict = {}
+        self,
+        model_params: dict,
+        train_params: dict | None = None,
+        data_params: dict | None = None,
     ) -> None:
         super().__init__()
+        train_params = {} if train_params is None else train_params
+        data_params = {} if data_params is None else data_params
 
         self.save_hyperparameters(ignore=["model"])
 
@@ -202,7 +81,6 @@ class LightningModel(pl.LightningModule):
         self.data_params = data_params
 
         # Build model
-        #self.model = DecimaModel(**{k: v for k, v in self.model_params.items()})
         self.model = DecimaModel(
             n_tasks=self.model_params["n_tasks"],
             replicate=self.model_params.get("replicate", 0),
@@ -229,9 +107,6 @@ class LightningModel(pl.LightningModule):
                 "pearson": PearsonCorrCoef(
                     num_outputs=self.model.head.n_tasks, average=False
                 ),
-                # "disease_lfc_mse": DiseaseLfcMSE(
-                #     pairs=self.train_params["pairs"], average=False
-                # )
             }
         )
         self.val_metrics = metrics.clone(prefix="val_")
@@ -283,31 +158,22 @@ class LightningModel(pl.LightningModule):
         x, y = batch
         logits = self.forward(x, logits=True)
         decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
-        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
-        #smoothness_loss = 0
         self.log("train_loss", decima_loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
-        #self.log("train_smoothness_loss", smoothness_loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
         self.log("train_poisson_loss", poisson_term, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
         self.log("train_multinomial_loss", multinomial_term, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
-        loss = decima_loss# + smoothness_loss
-        #self.log("train_combined_loss", loss, logger=True, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, reduce_fx="mean")
+        loss = decima_loss
         return loss
 
     def validation_step(self, batch: Tensor, batch_idx: int) -> Tensor:
         x, y = batch
         logits = self.forward(x, logits=True)
         decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
-        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
-        #smoothness_loss = 0
         y_hat = self.activation(logits)
         print(f"Pred variance: {y_hat.var():.6f}, Target variance: {y.var():.6f}")
-        #self.log("val_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
         self.log("val_poisson_loss", poisson_term, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
         self.log("val_multinomial_loss", multinomial_term, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
-        #self.log("val_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
         self.val_metrics.update(y_hat, y)
-        loss = decima_loss# + smoothness_loss
-        #self.log("val_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True, reduce_fx="mean")
+        loss = decima_loss
         self.val_losses.append(loss)
         return loss
 
@@ -334,16 +200,11 @@ class LightningModel(pl.LightningModule):
         x, y = batch
         logits = self.forward(x, logits=True)
         decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
-        #smoothness_loss = temporal_loss_grouped(logits, lambda_smooth=1, loss_type='l1')
-        #smoothness_loss = 0
         y_hat = self.activation(logits)
-        #self.log("test_loss", decima_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
         self.log("test_poisson_loss", poisson_term, logger=True, on_step=False, on_epoch=True, sync_dist=True)
         self.log("test_multinomial_loss", multinomial_term, logger=True, on_step=False, on_epoch=True, sync_dist=True)
-        #self.log("test_smoothness_loss", smoothness_loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
         self.test_metrics.update(y_hat, y)
-        loss = decima_loss# + smoothness_loss
-        #self.log("test_combined_loss", loss, logger=True, on_step=False, on_epoch=True, sync_dist=True)
+        loss = decima_loss
         self.test_losses.append(loss)
         return loss
 
@@ -505,9 +366,6 @@ class LightningModel(pl.LightningModule):
             )
             callbacks.append(early_stopping)
         
-        # os.environ["MASTER_ADDR"] = "localhost"
-        # if "MASTER_PORT" not in os.environ:
-        #     os.environ["MASTER_PORT"] = str(random.randint(20000, 29999))
 
         # Get trainer settings from train_params or use defaults
         accelerator = self.train_params.get("accelerator", "gpu" if torch.cuda.is_available() else "cpu")
@@ -520,7 +378,6 @@ class LightningModel(pl.LightningModule):
         # Set up trainer
         trainer = pl.Trainer(
             max_epochs=self.train_params["max_epochs"],
-            #max_steps=self.train_params["max_steps"],
             accelerator=accelerator,
             devices=devices,
             logger=logger,
@@ -544,10 +401,6 @@ class LightningModel(pl.LightningModule):
         train_dataloader = self.make_train_loader(train_dataset)
         val_dataloader = self.make_test_loader(val_dataset)
 
-        # if checkpoint_path is None:
-        #     # First validation pass
-        #     trainer.validate(model=self, dataloaders=val_dataloader)
-        #     self.val_metrics.reset()
 
         # Add data parameters
         self.data_params["tasks"] = train_dataset.tasks.reset_index(
@@ -642,18 +495,16 @@ class LightningModel(pl.LightningModule):
         self,
         tasks: Union[int, str, List[int], List[str]],
         key: str = "name",
-        invert: bool = False,
     ) -> Union[int, List[int]]:
         """
-        Given a task name or metadata entry, get the task index
-        If integers are provided, return them unchanged
+        Given a task name or metadata entry, get the task index.
+        If integers are provided, return them unchanged.
 
         Args:
             tasks: A string corresponding to a task name or metadata entry,
                 or an integer indicating the index of a task, or a list of strings/integers
             key: key to model.data_params["tasks"] in which the relevant task data is
                 stored. "name" will be used by default.
-            invert: Get indices for all tasks except those listed in tasks
 
         Returns:
             The index or indices of the corresponding task(s) in the model's
@@ -663,16 +514,9 @@ class LightningModel(pl.LightningModule):
         if isinstance(tasks, str):
             return self.data_params["tasks"][key].index(tasks)
         # If an integer is provided, return it as the index
-        elif isinstance(tasks, int):
+        if isinstance(tasks, int):
             return tasks
-        # If a list is provided, return teh index for each element
-        elif isinstance(tasks, list):
+        # If a list is provided, return the index for each element
+        if isinstance(tasks, list):
             return [self.get_task_idxs(task) for task in tasks]
-        else:
-            raise TypeError("Input must be a list, string or integer")
-        if invert:
-            return [
-                i
-                for i in range(self.model_params["n_tasks"])
-                if i not in make_list(tasks)
-            ]
+        raise TypeError("Input must be a list, string or integer")

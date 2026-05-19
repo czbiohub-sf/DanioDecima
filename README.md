@@ -129,39 +129,20 @@ sbatch daniodecima-applications-main/notebooks/9_design/00_submit_evolve_combine
 }
 ```
 
-## Pre-Submission Checklist
+## Project Status
 
-Before making this repository public or submitting to a conference, address the following:
+This project accompanies the DanioDecima manuscript (in preparation). It is maintained for reproducibility of the published results; critical bug fixes will be made as required. Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### Security
-- [ ] **Rotate WandB API keys**: Previously exposed keys in `scripts/finetune.py` and `scripts/finetune_temporal.py` have been removed from source but remain in git history. Rotate the affected key (`66d3a7...`) on the WandB dashboard (Settings > API keys) and scrub history with `git filter-repo` before making the repo public.
+## Contributing
 
-### Reproducibility
-- [ ] **Remove hardcoded paths**: ~150+ hardcoded absolute paths across the codebase reference user-specific HPC directories (`/hpc/mydata/mathias.voges/`, `/home/karollua/`, `/home/gunsalul/`, `/hpc/scratch/.../yangjoon.kim/`, `/gstore/data/resbioai/`, `/code/decima/`). Replace with environment variables, config files, or CLI arguments. Priority files:
-  - Core library: `src/decima/decima_model.py:109`, `lightning.py:26`, `lightning_temporal.py:23`
-  - Scripts: `finetune.py:15`, `finetune_temporal.py:15`, `decima_finetune.py:44,167`
-  - Shell: `submit_decima.sh:25-26`, `submit_decima_finetune.sh:4-7`
-  - Notebooks: all directories (0_sc_data_prep through 9_design)
-- [ ] **Fix sys.path hacks**: `lightning.py`, `lightning_temporal.py`, `interpret.py` manipulate `sys.path` instead of using proper relative imports
-- [ ] **Populate `install_requires`** in `daniodecima-main/setup.cfg` (currently empty; 15+ undeclared dependencies)
-- [ ] **Standardize seed handling** across scripts (currently inconsistent: some hardcode 0, some are configurable, some omit seeds entirely)
+We warmly welcome contributions from the community! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started.
 
-### Correctness
-- [ ] **Loss function epsilon**: `loss.py` defines `self.eps` but never uses it in `forward()` — division by zero and `log(0)` are unprotected (lines 34-35)
-- [ ] **Unreachable code**: `lightning.py:get_task_idxs` — the `invert` branch is after all return statements
-- [ ] **Early stopping overlap**: `00_evolve_combined.py:262-272` — comparison windows overlap
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to opensource@chanzuckerberg.com.
 
-### Code Quality
-- [ ] **Add test suite** (currently zero tests; `tests/conftest.py` is a stub)
-- [ ] **Remove dead code**: `02_summarize_results_designs_test.py` (~1200 commented lines), `lightning.py:281-341` (commented temporal smoothness)
-- [ ] **Fix bare `except` clauses**: `preprocess.py:228`, `setup.py:15`
-- [ ] **Update package metadata**: `setup.cfg` description is placeholder text; URL points to PyScaffold template
+## Reporting Security Issues
 
-### Documentation
-- [ ] **Update citation**: author list is "Voges, Mathias, et al." — needs full author list, venue, and year
-- [ ] **Fix path references** in `documents/DanioDecimaPipeline_README.md:209-237` (13 paths point to wrong user directory)
-- [ ] **Fix missing environment file**: `README_analysis_TF-MoDISco.md` references `environment_pytorch_full.yml` which does not exist
+If you believe you have found a security issue, please responsibly disclose by contacting us at security@chanzuckerberg.com. See [SECURITY.md](SECURITY.md) for details.
 
 ## License
 
-BSD-3-Clause license
+See [LICENSE.md](LICENSE.md). This repository is a derivative work of [Genentech/decima](https://github.com/Genentech/decima) and [Genentech/decima-applications](https://github.com/Genentech/decima-applications) and inherits their Non-Commercial Software License v1.0 (commercial use prohibited). Per-fork details are documented in `daniodecima-main/FORK_NOTES.md` and `daniodecima-applications-main/FORK_NOTES.md`. See [NOTICE](NOTICE) for upstream attribution and citation guidance.

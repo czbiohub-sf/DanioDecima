@@ -13,13 +13,9 @@ import matplotlib
 matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 import seaborn as sns
-import logomaker
-from pathlib import Path
 import torch
 import warnings
 import re
-import csv
-from collections import deque
 import time
 import anndata
 from datetime import datetime
@@ -60,23 +56,6 @@ def parse_arguments():
     log_progress("✓ Command line arguments parsed successfully")
     return args
 
-# def extract_info_from_filename(filename):
-#     """Extract model and experiment information from filename."""
-#     log_progress(f"Parsing filename: {filename}")
-#     # Example: evolved_promoter_HumanBorzoi_rep0_seed123_neural_crest_16hpf_simple.csv
-#     pattern = r'evolved_promoter_HumanBorzoi_rep(\d+)_seed(\d+)_(.+)_(\d+hpf)_simple\.csv'
-#     match = re.match(pattern, filename)
-    
-#     if match:
-#         rep_num = int(match.group(1))
-#         seed = int(match.group(2))
-#         celltype = match.group(3).replace('_', ' ')
-#         timepoint = match.group(4)
-#         log_progress(f"✓ Filename parsed: rep={rep_num}, seed={seed}, celltype='{celltype}', timepoint='{timepoint}'")
-#         return rep_num, seed, celltype, timepoint
-#     else:
-#         raise ValueError(f"Cannot parse filename: {filename}")
-
 def extract_info_from_filename(filename):
     """Extract model and experiment information from filename."""
     log_progress(f"Parsing filename: {filename}")
@@ -100,7 +79,7 @@ def extract_info_from_filename(filename):
                 celltype = match.group(3).replace('_', ' ')
                 timepoint = match.group(4)
             else:  # New formats
-                model_type = match.group(1)
+                match.group(1)
                 rep_num = int(match.group(2))
                 seed = int(match.group(3))
                 celltype = match.group(4).replace('_', ' ')
@@ -143,9 +122,6 @@ def load_model(checkpoint_path, device):
         log_progress("✓ Checkpoint parameters extracted")
 
         log_progress("Importing grelu modules...")
-        from grelu.sequence.format import strings_to_one_hot, intervals_to_strings
-        from grelu.sequence.mutate import mutate
-        import grelu.sequence.utils
         log_progress("✓ grelu modules imported")
 
         # Add decima source to path
@@ -234,12 +210,6 @@ def get_full_sequence(chrom, tss_start, window_size, tss_offset):
         log_progress(f"ERROR in sequence retrieval: {e}")
         raise
 
-# def place_sequence(full_seq, placed_seq, loc):
-#     """Place a sequence at a specific location within another sequence."""
-#     left_of_start = full_seq[0:loc]
-#     right_of_start = full_seq[loc:len(full_seq) - len(placed_seq)]
-#     new_seq = left_of_start + placed_seq + right_of_start
-#     return new_seq
 
 def place_sequence(full_seq, placed_seq, loc):
     """Place a sequence at a specific location within another sequence."""
@@ -274,7 +244,6 @@ def filter_celltypes(task_df, target_celltype, timepoint):
     target_mask = (task_df['zebrafish_anatomy_ontology_class_fine'] == target_celltype) & \
                   (task_df['timepoint'] == timepoint)
     
-    #background_mask = ~target_mask  # Simply the inverse of target mask
     background_mask = (task_df['zebrafish_anatomy_ontology_class_fine'] != target_celltype) & \
                      (task_df['timepoint'] == timepoint)
     
@@ -341,8 +310,6 @@ def analyze_evolution_trajectory(df, model, data_params, ad, target_celltype, ti
             target_mean = predictions[target_indices].mean()
             background_mean = predictions[background_indices].mean()
             specificity = target_mean - background_mean
-            # background_max = predictions[background_indices].max()
-            # specificity = target_mean - background_max
             
             predictions_list.append({
                 'round': row['Round'],
@@ -800,28 +767,6 @@ def main():
         except ValueError as e:
             log_progress(f"ERROR: {e}")
             return
-        
-        # # Determine model directory based on rep_num
-        # if rep_num == 0:
-        #     model_subdir = "0/task_0/lr_3e-05_bs_4_w_0.0001/version_0/"
-        #     log_progress(f"Using model for rep0: {model_subdir}")
-        # elif rep_num == 1:
-        #     model_subdir = "1/task_1/lr_3e-05_bs_4_w_0.0001/version_0/"
-        #     log_progress(f"Using model for rep1: {model_subdir}")
-        # elif rep_num == 2:
-        #     model_subdir = "2/task_2/lr_3e-05_bs_4_w_0.0001/version_0/"
-        #     log_progress(f"Using model for rep2: {model_subdir}")
-        # elif rep_num == 3:
-        #     model_subdir = "3/task_3/lr_3e-05_bs_4_w_0.0001/version_0/"
-        #     log_progress(f"Using model for rep3: {model_subdir}")
-        # else:
-        #     log_progress(f"ERROR: Unknown replicate number: {rep_num}")
-        #     return
-        
-        # model_dir = os.path.join(args.model_base_dir, model_subdir)
-        # log_progress(f"Full model path: {model_dir}")
-
-        model_dir = args.model_base_dir
         log_progress(f"Using model directory directly: {model_dir}")
         
         # Find and load model

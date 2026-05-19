@@ -194,8 +194,8 @@ def load_ncbi_string(string):
     
     # Check the total count
     if reports == {"total_count": 0}:
-        pass
-    else:        
+        return pd.DataFrame()
+    else:
         for i, r in enumerate(reports['reports']):
             try:
                 curr_dict = {}
@@ -225,7 +225,8 @@ def load_ncbi_string(string):
                             curr_dict['strand'] = '-' if annot['genomic_locations'][0]['genomic_range']['orientation'] == "minus" else "+"
             
                 out.append(curr_dict)
-            except:
+            except (KeyError, IndexError, TypeError):
+                # missing or malformed NCBI fields for this record — skip it
                 print(i)
         
         out = pd.DataFrame(out)

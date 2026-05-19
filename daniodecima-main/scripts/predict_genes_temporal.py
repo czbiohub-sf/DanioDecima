@@ -1,11 +1,9 @@
 # Given an hdf5 file created by write_hdf5.py, make predictions for all the genes
 
 import numpy as np
-import pandas as pd
 import anndata
 import os, sys
 import torch
-from tqdm import tqdm
 import argparse
 
 src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
@@ -34,7 +32,6 @@ args = parser.parse_args()
 
 torch.set_float32_matmul_precision("medium")
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device)
-device = torch.device(0)
 
 print("Loading anndata")
 ad = anndata.read_h5ad(args.matrix_file)

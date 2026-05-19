@@ -1,5 +1,4 @@
 import torch
-from torch import tensor, nn
 from grelu.lightning.metrics import MSE
 from torchmetrics import Metric
 

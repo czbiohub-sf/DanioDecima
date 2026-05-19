@@ -43,7 +43,6 @@ class TaskWisePoissonMultinomialLoss(nn.Module):
         multinomial_dot = -torch.multiply(target, log_p_input)  # B x T
         multinomial_term = multinomial_dot.mean()
 
-        #print(f"total_input: {total_input.mean().item()}, total_target: {total_target.mean().item()}, raw loss: {poisson_term_raw.item()}")
 
         # Combine
         loss = multinomial_term + poisson_term

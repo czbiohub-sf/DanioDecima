@@ -4,12 +4,10 @@
 # Software License v1.0).
 
 import torch
-import grelu
 from torch import nn
 from grelu.model.models import BorzoiModel, BaseModel
 from grelu.model.heads import ConvHead
 from huggingface_hub import hf_hub_download
-from pathlib import Path
 import random
 import numpy as np
 

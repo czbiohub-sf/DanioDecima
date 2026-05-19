@@ -2,7 +2,6 @@ import anndata
 import os, sys
 import argparse
 import wandb
-from pytorch_lightning.loggers import WandbLogger
 
 src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
 sys.path.insert(0, src_dir)  # before installed lightning pkg
@@ -71,8 +70,6 @@ def main():
         "total_weight": args.weight,
         "accumulate_grad_batches": args.grad,
         "loss": 'poisson_multinomial'
-        #"log_every_n_steps": 50,
-        #"pairs": ad.uns["disease_pairs"].values
     }
     
     model_params = {

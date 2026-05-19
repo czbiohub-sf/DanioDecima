@@ -37,3 +37,9 @@ documents/DECIMA_*.md
 documents/ANALYSIS_*.md
 documents/TRAINING_*.md
 documents/daniocell_*.md
+
+# Manuscript-figure regeneration workstream (lives on the figure-revision branch).
+# These files should not appear on main / code-review.
+manuscript_figures/
+docs/slides/
+scripts/generate_slides_*.py

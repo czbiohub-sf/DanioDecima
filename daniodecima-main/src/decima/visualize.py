@@ -12,8 +12,7 @@ src_dir = os.path.dirname(__file__)
 sys.path.append(src_dir)
 
 from evaluate import match_criteria
-from grelu.visualize import plot_attributions, plot_tracks
-from scipy.ndimage import gaussian_filter1d
+from grelu.visualize import plot_attributions
 
 
 def plot_logo(motif, rc=False, figsize=(2, 1)):

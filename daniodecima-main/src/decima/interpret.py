@@ -1,12 +1,9 @@
 import numpy as np
 import pandas as pd
-from grelu.sequence.format import convert_input_type
-from grelu.interpret.motifs import scan_sequences
 from grelu.transforms.prediction_transforms import Specificity, Aggregate
 import torch
 import os, sys
-from captum.attr import InputXGradient, Saliency
-from scipy.signal import find_peaks
+from captum.attr import InputXGradient
 from collections import defaultdict
 from pymemesuite.common import Sequence, Background, Array, Alphabet, MotifFile
 from pymemesuite.fimo import FIMO

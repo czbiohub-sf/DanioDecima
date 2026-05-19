@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import numpy as np
-import pandas as pd
 import anndata
 import os
 import sys
@@ -8,7 +7,6 @@ import torch
 import argparse
 import tqdm
 import json
-from pathlib import Path
 
 # Add paths
 sys.path.append('/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/')

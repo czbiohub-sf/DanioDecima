@@ -13,7 +13,6 @@ import argparse
 import csv
 import glob
 import re
-from pathlib import Path
 import time
 from collections import deque
 
@@ -87,9 +86,6 @@ def load_model(checkpoint_path, device):
     train_params = ckpt['hyper_parameters']['train_params']
     data_params = ckpt['hyper_parameters'].get('data_params', {})
 
-    from grelu.sequence.format import strings_to_one_hot, intervals_to_strings
-    from grelu.sequence.mutate import mutate
-    import grelu.sequence.utils
 
     # Add decima source to path
     src_dir = '/hpc/mydata/mathias.voges/Projects/research/seq2fun/step/daniodecima-main/src/decima/'
@@ -337,7 +333,7 @@ def main():
     model_info = extract_model_info(args.model_dir)
     
     # Load data
-    ad = load_data(args.model_dir)  # Use model_dir to find model-specific data
+    load_data(args.model_dir)  # Use model_dir to find model-specific data
     
     # Create task dataframe and filter celltypes
     task_df = pd.DataFrame(data_params['tasks'])

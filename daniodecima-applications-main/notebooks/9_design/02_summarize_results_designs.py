@@ -5,8 +5,6 @@ Enhanced with ISM weight percentile filtering and sequence specificity checks.
 Updated for new evolution pipeline results.
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 import pandas as pd
@@ -14,8 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import warnings
-import re
-from collections import defaultdict, Counter
 warnings.filterwarnings('ignore')
 
 def extract_metadata_from_filename(filename):
@@ -615,8 +611,7 @@ def create_celltype_occurrence_tables(motifs_df):
         # Get successful replicate count for this cell type
         if cell_type in replicate_stats:
             successful_reps = replicate_stats[cell_type]['successful_replicates']
-            expected_reps = replicate_stats[cell_type]['expected_replicates']
-            
+
             if successful_reps > 0:
                 # Normalize by successful replicates (not total expected)
                 for col in normalized_table.columns:

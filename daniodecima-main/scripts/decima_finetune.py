@@ -6,7 +6,6 @@ import random
 import torch
 import numpy as np
 import anndata
-import tempfile
 import json
 from pytorch_lightning.loggers import TensorBoardLogger
 
@@ -56,9 +55,6 @@ def train_single_experiment(config):
     print(f"   Config: {os.environ['GENOMEPY_CONFIG']}")
     print(f"   Cache: {os.environ['GENOMEPY_CACHE_DIR']}")
     
-    # # Set deterministic port based on seed
-    # port = 20000 + (config["seed"] % 1000)
-    # os.environ["MASTER_PORT"] = str(port)
     
     # Load data
     matrix_file = os.path.join(config["dir"], "zebrahub_aggregated.h5ad")

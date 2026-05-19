@@ -43,3 +43,9 @@ documents/daniocell_*.md
 manuscript_figures/
 docs/slides/
 scripts/generate_slides_*.py
+# Figure-revision render outputs (live alongside the figure-revision branch only;
+# the pre-rename `decima-*-main/` directory paths must not appear on this branch).
+decima-applications-main/
+decima-main/
+**/render_fig*_*.py
+**/notebooks/*/figures/

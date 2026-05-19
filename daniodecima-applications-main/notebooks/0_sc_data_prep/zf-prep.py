@@ -43,7 +43,7 @@ ad._sanitize()
 # ## Filtering 
 
 # %%
-ad.obs
+print(ad.obs)
 
 # %%
 ident_cols = ['annotation']  # adjust these columns as needed
@@ -64,10 +64,10 @@ del adp.layers['sum']  # cleanup
 adp.obs = adp.obs.merge(counts, how='left')
 
 # %%
-adp.obs
+print(adp.obs)
 
 # %%
-adp.X
+print(adp.X)
 
 # %%
 #ad = ad[(ad.obs.cell_or_nuclei == 'Nuclei') &  (ad.obs.cell_state!='unclassified')].copy()
@@ -90,7 +90,7 @@ ad._sanitize()
 # ## Now the pseudobulking
 
 # %%
-ad.var
+print(ad.var)
 
 # %%
 counts = ad.obs[ident_cols].value_counts().reset_index()

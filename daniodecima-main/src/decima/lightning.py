@@ -185,11 +185,17 @@ class LightningModel(pl.LightningModule):
     """
 
     def __init__(
-        self, model_params: dict, train_params: dict = {}, data_params: dict = {}
+        self,
+        model_params: dict,
+        train_params: Optional[dict] = None,
+        data_params: Optional[dict] = None,
     ) -> None:
         super().__init__()
 
         self.save_hyperparameters(ignore=["model"])
+
+        train_params = {} if train_params is None else dict(train_params)
+        data_params = {} if data_params is None else dict(data_params)
 
         # Add default training parameters
         for key in default_train_params.keys():

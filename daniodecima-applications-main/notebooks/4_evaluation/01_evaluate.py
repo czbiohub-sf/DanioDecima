@@ -28,7 +28,6 @@ from plotnine import *
 #save_dir="/gstore/data/resbioai/grelu/decima/20240823"
 save_dir="/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima"
 matrix_file = os.path.join(save_dir, "data_out_zf-Decima_Random_Rep0.h5ad")
-_h5_file = os.path.join(save_dir, "data.h5")
 
 # %% [markdown]
 # ## Load data

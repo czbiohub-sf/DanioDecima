@@ -4,17 +4,13 @@ Create heatmaps and tables of motif occurrences by cell type for each model.
 Shows motif frequency patterns across cell types with separate analysis per model.
 """
 
-import os
-import sys
 import argparse
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import warnings
 import re
-from collections import defaultdict, Counter
 warnings.filterwarnings('ignore')
 
 def parse_arguments():

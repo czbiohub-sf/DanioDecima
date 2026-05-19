@@ -5,8 +5,6 @@ Enhanced with ISM weight percentile filtering and sequence specificity checks.
 Updated for new evolution pipeline results.
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 import pandas as pd
@@ -14,8 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import warnings
-import re
-from collections import defaultdict, Counter
 warnings.filterwarnings('ignore')
 
 def extract_metadata_from_filename(filename):

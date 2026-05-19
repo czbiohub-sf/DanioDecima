@@ -2,7 +2,6 @@ import anndata
 import os, sys
 import argparse
 import wandb
-from pytorch_lightning.loggers import WandbLogger
 
 src_dir = f'{os.path.dirname(__file__)}/../src/decima/'
 sys.path.insert(0, src_dir)  # before installed lightning pkg

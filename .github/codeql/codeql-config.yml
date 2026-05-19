@@ -1,0 +1,19 @@
+name: "DanioDecima CodeQL config"
+
+# These .py files are jupytext exports of committed .ipynb files in the same
+# directories. The .ipynb is the source of truth; the .py is auto-regenerated.
+# Suppressing them from CodeQL avoids double-counting alerts on identical code
+# (e.g., the same unused import appearing in both .ipynb cell source and the
+# exported .py).
+#
+# When the .ipynb is fixed, the .py should be re-exported via `jupytext --sync`.
+#
+# To activate this config, the repository must use the "advanced" CodeQL setup
+# (Settings → Code security → Code scanning → CodeQL → Advanced setup), with
+# a workflow that references this file via `config-file: ./.github/codeql/codeql-config.yml`.
+paths-ignore:
+  - daniodecima-applications-main/notebooks/0_sc_data_prep/zf-prep.py
+  - daniodecima-applications-main/notebooks/2_dataset/zebrafish.py
+  - daniodecima-applications-main/notebooks/3_training/01_finetune.py
+  - daniodecima-applications-main/notebooks/4_evaluation/00_predict.py
+  - daniodecima-applications-main/notebooks/4_evaluation/01_evaluate.py

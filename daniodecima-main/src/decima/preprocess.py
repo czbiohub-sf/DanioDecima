@@ -225,7 +225,8 @@ def load_ncbi_string(string):
                             curr_dict['strand'] = '-' if annot['genomic_locations'][0]['genomic_range']['orientation'] == "minus" else "+"
             
                 out.append(curr_dict)
-            except:
+            except (KeyError, IndexError, TypeError):
+                # missing or malformed NCBI fields for this record — skip it
                 print(i)
         
         out = pd.DataFrame(out)

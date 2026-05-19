@@ -15,7 +15,6 @@ import sys
 import pickle
 from tqdm import tqdm
 import bioframe as bf
-from scipy.stats import mannwhitneyu, kruskal, wilcoxon
 
 # Argument parsing
 parser = argparse.ArgumentParser(description="Calculate and analyze attributions for a given checkpoint and model directory.")

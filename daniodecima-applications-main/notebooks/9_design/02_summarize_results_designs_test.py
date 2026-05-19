@@ -444,16 +444,11 @@ Enhanced motif occurrence analysis with cell type focus and comprehensive CSV ou
 Updated for new nested directory structure (analysis_25ct_20250619).
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
 import re
-from datetime import datetime
 
 def find_analysis_directories(results_dir):
     """Find all analysis subdirectories in the new nested structure."""
@@ -660,9 +655,10 @@ def extract_metadata_from_csv_content_improved(df, dirname, motif_file_path):
                             metadata['cell_type'] = cell_type_candidate.replace('_', ' ').title()
                             print(f"    Inferred cell type from other files: {metadata['cell_type']}")
                             break
-        except:
+        except (AttributeError, KeyError, IndexError, OSError):
+            # filename-pattern fallback failed; metadata stays empty for this entry
             pass
-    
+
     return metadata
 
 def load_trajectory_data_nested(results_dir):

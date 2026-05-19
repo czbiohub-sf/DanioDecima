@@ -6,7 +6,6 @@ import random
 import torch
 import numpy as np
 import anndata
-import tempfile
 import json
 from pytorch_lightning.loggers import TensorBoardLogger
 

@@ -13,13 +13,9 @@ import matplotlib
 matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 import seaborn as sns
-import logomaker
-from pathlib import Path
 import torch
 import warnings
 import re
-import csv
-from collections import deque
 import time
 import anndata
 from datetime import datetime
@@ -143,9 +139,6 @@ def load_model(checkpoint_path, device):
         log_progress("✓ Checkpoint parameters extracted")
 
         log_progress("Importing grelu modules...")
-        from grelu.sequence.format import strings_to_one_hot, intervals_to_strings
-        from grelu.sequence.mutate import mutate
-        import grelu.sequence.utils
         log_progress("✓ grelu modules imported")
 
         # Add decima source to path

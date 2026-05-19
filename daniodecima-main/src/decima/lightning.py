@@ -7,12 +7,10 @@
 The LightningModel class.
 """
 
-import warnings
 from datetime import datetime
 from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
-import pandas as pd
 import pytorch_lightning as pl
 import torch
 from einops import rearrange
@@ -23,8 +21,7 @@ from torch.utils.data import DataLoader
 from torchmetrics import MetricCollection
 
 from grelu.lightning.metrics import MSE, PearsonCorrCoef
-from grelu.sequence.format import strings_to_one_hot
-from grelu.utils import get_aggfunc, get_compare_func, make_list
+from grelu.utils import make_list
 
 import os, sys
 sys.path.append(os.path.dirname(__file__))
@@ -32,8 +29,6 @@ sys.path.insert(0, '/code/decima/src/decima')
 
 from decima_model import DecimaModel
 from loss import TaskWisePoissonMultinomialLoss
-from read_hdf5 import VariantDataset
-from metrics import DiseaseLfcMSE
 
 
 default_train_params = {
@@ -185,9 +180,14 @@ class LightningModel(pl.LightningModule):
     """
 
     def __init__(
-        self, model_params: dict, train_params: dict = {}, data_params: dict = {}
+        self,
+        model_params: dict,
+        train_params: dict | None = None,
+        data_params: dict | None = None,
     ) -> None:
         super().__init__()
+        train_params = {} if train_params is None else train_params
+        data_params = {} if data_params is None else data_params
 
         self.save_hyperparameters(ignore=["model"])
 
@@ -642,18 +642,16 @@ class LightningModel(pl.LightningModule):
         self,
         tasks: Union[int, str, List[int], List[str]],
         key: str = "name",
-        invert: bool = False,
     ) -> Union[int, List[int]]:
         """
-        Given a task name or metadata entry, get the task index
-        If integers are provided, return them unchanged
+        Given a task name or metadata entry, get the task index.
+        If integers are provided, return them unchanged.
 
         Args:
             tasks: A string corresponding to a task name or metadata entry,
                 or an integer indicating the index of a task, or a list of strings/integers
             key: key to model.data_params["tasks"] in which the relevant task data is
                 stored. "name" will be used by default.
-            invert: Get indices for all tasks except those listed in tasks
 
         Returns:
             The index or indices of the corresponding task(s) in the model's
@@ -663,16 +661,9 @@ class LightningModel(pl.LightningModule):
         if isinstance(tasks, str):
             return self.data_params["tasks"][key].index(tasks)
         # If an integer is provided, return it as the index
-        elif isinstance(tasks, int):
+        if isinstance(tasks, int):
             return tasks
-        # If a list is provided, return teh index for each element
-        elif isinstance(tasks, list):
+        # If a list is provided, return the index for each element
+        if isinstance(tasks, list):
             return [self.get_task_idxs(task) for task in tasks]
-        else:
-            raise TypeError("Input must be a list, string or integer")
-        if invert:
-            return [
-                i
-                for i in range(self.model_params["n_tasks"])
-                if i not in make_list(tasks)
-            ]
+        raise TypeError("Input must be a list, string or integer")

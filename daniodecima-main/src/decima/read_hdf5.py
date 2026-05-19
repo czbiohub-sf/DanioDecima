@@ -8,7 +8,7 @@ import h5py
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
-from grelu.sequence.format import indices_to_one_hot, one_hot_to_strings, BASE_TO_INDEX_HASH
+from grelu.sequence.format import indices_to_one_hot, BASE_TO_INDEX_HASH
 from grelu.data.augment import Augmenter, _split_overall_idx
 
 
@@ -355,7 +355,9 @@ class GeneForecastDataset(Dataset):
         for cell_type in self.cell_types:
             expr = expr_dict[cell_type]
             if expr.shape[0] < self.history_length + self.forecast_horizon:
-                raise ValueError(f"Cell type {cell_type} has too few timepoints for gene index {gene_idx}.")
+                raise IndexError(
+                    f"Cell type {cell_type} has too few timepoints for gene index {gene_idx}."
+                )
             # For simplicity, take the first history_length as input and the next forecast_horizon as target.
             input_series.append(expr[:self.history_length])
             target_series.append(expr[self.history_length:self.history_length + self.forecast_horizon])

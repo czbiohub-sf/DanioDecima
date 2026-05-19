@@ -16,11 +16,8 @@
 # # Evaluate Decima's performance on held-out genes
 
 # %%
-import numpy as np
-import pandas as pd
 import anndata
 import os
-from grelu.visualize import plot_distribution
 from plotnine import *
 # %matplotlib inline
 
@@ -31,7 +28,7 @@ from plotnine import *
 #save_dir="/gstore/data/resbioai/grelu/decima/20240823"
 save_dir="/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima"
 matrix_file = os.path.join(save_dir, "data_out_zf-Decima_Random_Rep0.h5ad")
-h5_file = os.path.join(save_dir, "data.h5")
+_h5_file = os.path.join(save_dir, "data.h5")
 
 # %% [markdown]
 # ## Load data
@@ -40,7 +37,7 @@ h5_file = os.path.join(save_dir, "data.h5")
 ad = anndata.read_h5ad(matrix_file)
 
 # %%
-ad
+print(ad)
 
 # %%
 for dataset in ad.var.dataset.unique():

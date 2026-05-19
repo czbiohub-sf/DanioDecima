@@ -13,31 +13,24 @@
 # ---
 
 # %%
-import numpy as np
-import pandas as pd
-import anndata
-import os, sys
+import glob
+import os
+import sys
+
 sys.path.append('/code/decima/src/decima')
-
-#import read_hdf5
-# from lightning import LightningModel
-
-# from grelu.visualize import plot_distribution
-# from plotnine import *
-# # %matplotlib inline
 
 # %% [markdown]
 # ## Paths
 
 # %%
-save_dir="/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima"
+save_dir = "/hpc/mydata/mathias.voges/Projects/research/zf-decima/outputs/grelu/decima"
 matrix_file = os.path.join(save_dir, "zebrahub_aggregated.h5ad")
 h5_file = os.path.join(save_dir, "data.h5")
-ckpt_dir = os.path.join(save_dir, 'lightning_logs/umv5p24k') 
+ckpt_dir = os.path.join(save_dir, "lightning_logs/umv5p24k")
 
 # %%
-# ckpts = !find {ckpt_dir} -name e*.ckpt
-ckpts
+ckpts = sorted(glob.glob(os.path.join(ckpt_dir, "e*.ckpt")))
+print(ckpts)
 
 # %% [markdown]
 # ## Get predictions

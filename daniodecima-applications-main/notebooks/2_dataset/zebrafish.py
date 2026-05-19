@@ -14,9 +14,7 @@
 
 # %%
 import anndata
-import os, sys
-import argparse
-import wandb
+import os
 
 import importlib.util
 
@@ -64,7 +62,7 @@ print(ad)
 # Make datasets
 # print("Making dataset objects")
 train_dataset = read_hdf5.GeneForecastDataset(h5_file=h5_file, ad=ad, key="train", max_seq_shift=5000, augment_mode="random", seed=0, history_length=7, forecast_horizon=3)
-val_dataset = read_hdf5.GeneForecastDataset(h5_file=h5_file, ad=ad, key="val", max_seq_shift=0, history_length=7, forecast_horizon=3)
+_val_dataset = read_hdf5.GeneForecastDataset(h5_file=h5_file, ad=ad, key="val", max_seq_shift=0, history_length=7, forecast_horizon=3)
 
 # %%
 train_dataset[4]
@@ -85,7 +83,7 @@ train_dataset[4]
 # print(ad)
 
 # %%
-ad.obs
+print(ad.obs)
 
 # %%
 cns_cells = ad[ad.obs['cell_type'] == 'central_nervous_system'].copy()
@@ -97,7 +95,7 @@ periderm_cells = ad[ad.obs['cell_type'] == 'periderm'].copy()
 notochord_cells.obs['timepoint']
 
 # %%
-cns_cells.var
+print(cns_cells.var)
 
 # %%
 import pandas as pd
@@ -110,14 +108,13 @@ expression_df = pd.DataFrame(cns_cells[:, ['neurog1']].X.toarray(),
 
 
 # %%
-expression_df
+print(expression_df)
 
 # %%
 import scanpy as sc
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 
 # Assuming cns_cells is your AnnData object with CNS cells
 # and it has a column in .obs called 'timepoint' or similar

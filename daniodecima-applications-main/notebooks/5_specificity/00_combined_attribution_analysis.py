@@ -73,14 +73,6 @@ for gene in tqdm(ad.var_names, desc="Preparing gene data"):
     tasks.append(ad.obs_names[np.array(ad[:, gene].X).squeeze() > .5].tolist())
     seqs.append(extract_gene_data(h5_file, gene, merge=True))
 
-# Filter for 16hpf celltype tasks
-# tasks_16hpf = [60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84]
-
-# filtered_tasks = []
-# for task_list in tasks:
-#     filtered_list = [item for item in task_list if int(item) in tasks_16hpf]
-#     filtered_tasks.append(filtered_list)
-
 # Calculate attributions
 torch.cuda.set_device(args.device)
 attr_outfile = os.path.join(args.model_dir, f'{args.name}-attr-th05-all.h5')

@@ -32,7 +32,6 @@ args = parser.parse_args()
 
 torch.set_float32_matmul_precision("medium")
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device)
-device = torch.device(0)
 
 print("Loading anndata")
 ad = anndata.read_h5ad(args.matrix_file)

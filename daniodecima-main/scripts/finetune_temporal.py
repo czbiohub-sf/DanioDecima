@@ -70,8 +70,6 @@ def main():
         "total_weight": args.weight,
         "accumulate_grad_batches": args.grad,
         "loss": 'poisson_multinomial'
-        #"log_every_n_steps": 50,
-        #"pairs": ad.uns["disease_pairs"].values
     }
     
     model_params = {

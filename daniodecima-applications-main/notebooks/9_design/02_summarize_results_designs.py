@@ -611,8 +611,7 @@ def create_celltype_occurrence_tables(motifs_df):
         # Get successful replicate count for this cell type
         if cell_type in replicate_stats:
             successful_reps = replicate_stats[cell_type]['successful_replicates']
-            expected_reps = replicate_stats[cell_type]['expected_replicates']
-            
+
             if successful_reps > 0:
                 # Normalize by successful replicates (not total expected)
                 for col in normalized_table.columns:

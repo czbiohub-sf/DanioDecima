@@ -277,7 +277,6 @@ class GeneForecastDataset(Dataset):
         self.extract_tasks(ad)
         self.predict = False
         self.n_alleles = 1
-        #self.cell_types = sorted(self.ad.obs["cell_type"].unique())
         self.cell_types = ['central_nervous_system', 'endoderm', 'lateral_mesoderm']
         self.n_cell_types = len(self.cell_types)
 

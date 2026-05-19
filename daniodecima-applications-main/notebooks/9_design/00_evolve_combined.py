@@ -333,7 +333,7 @@ def main():
     model_info = extract_model_info(args.model_dir)
     
     # Load data
-    ad = load_data(args.model_dir)  # Use model_dir to find model-specific data
+    load_data(args.model_dir)  # Use model_dir to find model-specific data
     
     # Create task dataframe and filter celltypes
     task_df = pd.DataFrame(data_params['tasks'])

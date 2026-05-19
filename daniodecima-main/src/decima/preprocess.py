@@ -194,8 +194,8 @@ def load_ncbi_string(string):
     
     # Check the total count
     if reports == {"total_count": 0}:
-        pass
-    else:        
+        return pd.DataFrame()
+    else:
         for i, r in enumerate(reports['reports']):
             try:
                 curr_dict = {}

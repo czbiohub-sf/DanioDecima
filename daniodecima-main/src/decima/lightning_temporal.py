@@ -344,7 +344,6 @@ class JointLightningModel(pl.LightningModule):
             checkpoint_path=self.model_params.get("checkpoint_path", None)
         )
         
-        #print(f"self.model_params: {self.model_params}")
 
         self.forecast_model = GeneTissueSpecificLSTM(
             expr_input_dim=self.model_params.get("expr_input_dim", self.model_params["cell_types"]),  # input dimension is n_cell_types
@@ -380,8 +379,6 @@ class JointLightningModel(pl.LightningModule):
         
         # Initialize metrics (example with MSE and Pearson)
         metrics = MetricCollection({
-            #"mse_cell_type": MSE(num_outputs=self.model_params["cell_types"], average=False),
-            #"pearson_cell_type": PearsonCorrCoef(num_outputs=self.model_params["cell_types"], average=False),
             "mse_forecast_horizon": MSE(num_outputs=self.model_params["forecast_horizon"], average=False),
             "pearson_forecast_horizon": PearsonCorrCoef(num_outputs=self.model_params["forecast_horizon"], average=False),
         })
@@ -443,8 +440,6 @@ class JointLightningModel(pl.LightningModule):
                 self.train_params["ae_loss_weight"] * loss_ae)
         
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
-        #self.log("train_decima_loss", loss_decima, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
-        #self.log("train_forecast_loss", loss_forecast, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
         return loss
 
     def on_train_batch_end(self, outputs, batch, batch_idx):
@@ -473,7 +468,6 @@ class JointLightningModel(pl.LightningModule):
         historical_target = batch["expr_series"]#.mean(dim=1)
         historical_target = historical_target.reshape(historical_target.size(0), -1)
         loss_decima = self.decima_loss_fn(decima_pred, historical_target)
-        y_hat = self.activation(decima_pred)
 
         forecast_target = batch["target"]
         loss_forecast = self.forecast_loss_fn(forecast_pred, forecast_target)
@@ -714,8 +708,6 @@ class JointLightningModel(pl.LightningModule):
             num_workers=num_workers,
             batch_size=batch_size,
         )
-        #first_item = dataloader.dataset[1]
-        #print(f"First item: {first_item}")
         trainer = pl.Trainer(accelerator="gpu", devices=make_list(devices), logger=None)
 
         all_forecasts = []

@@ -58,7 +58,6 @@ model = LightningModel(model_params, train_params, data_params)
 model.load_state_dict(state_dict)
 model.eval()
 models = [model.to(device)]
-#models = [LightningModel.load_from_checkpoint(f).eval() for f in args.ckpts]
 
 print("Computing predictions")
 preds = np.stack([model.predict_on_dataset(ds, devices=0, batch_size=6, num_workers=16) for model in models]).mean(0).T

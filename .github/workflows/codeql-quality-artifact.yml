@@ -36,12 +36,13 @@ jobs:
       - name: Install CodeQL CLI
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/codeql"
-          cd "$RUNNER_TEMP/codeql"
-          curl -fsSL -o cli.tar.gz \
-            "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64.tar.gz"
-          tar xzf cli.tar.gz
-          echo "$RUNNER_TEMP/codeql/codeql" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/codeql-install"
+          cd "$RUNNER_TEMP/codeql-install"
+          curl -fsSL -o cli.zip \
+            "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64.zip"
+          unzip -q cli.zip
+          # The archive unpacks to ./codeql/codeql (binary inside codeql/ dir)
+          echo "$RUNNER_TEMP/codeql-install/codeql" >> "$GITHUB_PATH"
 
       - name: Verify CodeQL CLI
         run: codeql version

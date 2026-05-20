@@ -400,7 +400,7 @@ def create_evolution_plots(results_df, output_prefix):
     log_progress(f"✓ Evolution plots saved to: {os.path.basename(plot_file)}", start_time)
 
 
-def perform_ism_analysis(sequence, model, data_params, ad, _target_celltype, _timepoint, 
+def perform_ism_analysis(sequence, model, data_params, ad, target_celltype, timepoint, 
                         full_sequence, tss_offset, window_size):
     """
     Perform In Silico Mutagenesis (ISM) analysis.

@@ -39,7 +39,7 @@ def list_genes(h5_file, key=None):
         return genes[genes[:, 1] == key, 0]
 
 
-def get_gene_idx(h5_file, gene, _key=None):
+def get_gene_idx(h5_file, gene, key=None):
     gene_ord = list_genes(h5_file, key=None)
     return np.where(gene_ord == gene)[0][0]
 

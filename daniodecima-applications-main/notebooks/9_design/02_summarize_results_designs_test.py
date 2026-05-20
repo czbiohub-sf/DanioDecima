@@ -71,7 +71,7 @@ def debug_filenames(results_dir):
             else:
                 print(f"    No patterns matched")
 
-def extract_metadata_from_csv_content_improved(_df, dirname, motif_file_path):
+def extract_metadata_from_csv_content_improved(df, dirname, motif_file_path):
     """Extract metadata from CSV file content and infer from file patterns."""
     metadata = {
         'analysis_id': dirname,
@@ -564,7 +564,7 @@ def create_celltype_occurrence_tables(motifs_df):
     
     return tables, summaries, normalized_tables, replicate_stats
 
-def create_volcano_plot_instructions(_averaged_table, output_dir):
+def create_volcano_plot_instructions(averaged_table, output_dir):
     """Create instructions for volcano plot analysis."""
     instructions_file = output_dir / 'volcano_plot_instructions.txt'
     
@@ -581,7 +581,7 @@ def create_volcano_plot_instructions(_averaged_table, output_dir):
         f.write("2. Identify cell type-specific motifs\n")
         f.write("3. Create volcano plots for differential motif usage\n")
 
-def save_celltype_focused_reports(tables, summaries, motifs_df, output_dir, _args, normalized_tables=None, _replicate_stats=None):
+def save_celltype_focused_reports(tables, summaries, motifs_df, output_dir, args, normalized_tables=None, replicate_stats=None):
     """Save cell type-focused reports."""
     output_dir = Path(output_dir)
     

@@ -128,7 +128,7 @@ def get_model_info(model_id):
     
     return model_dirs[model_id], model_names[model_id]
 
-def load_model_and_data(model_dir, _h5_file, timepoint=None):
+def load_model_and_data(model_dir, h5_file, timepoint=None):
     """Load model and data, optionally filtering by timepoint"""
     # Find checkpoint
     checkpoint_dir = os.path.join(model_dir, "checkpoints")

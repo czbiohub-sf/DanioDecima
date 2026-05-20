@@ -245,7 +245,7 @@ def calculate_replicate_success_rates(motifs_df):
     
     return replicate_stats
 
-def create_enhanced_plots(motifs_df, _tables, output_dir):
+def create_enhanced_plots(motifs_df, tables, output_dir):
     """Create enhanced comparison plots including ISM weight and specificity analysis."""
     output_dir = Path(output_dir)
     
@@ -648,7 +648,7 @@ def create_celltype_occurrence_tables(motifs_df):
     
     return tables, summaries, normalized_tables, replicate_stats
 
-def save_celltype_focused_reports(tables, summaries, motifs_df, output_dir, _args, normalized_tables=None, _replicate_stats=None):
+def save_celltype_focused_reports(tables, summaries, motifs_df, output_dir, args, normalized_tables=None, replicate_stats=None):
     """Save cell type-focused reports."""
     output_dir = Path(output_dir)
     
@@ -779,7 +779,7 @@ def create_replicate_success_report(replicate_stats, output_dir):
     print("✓ Replicate success report saved")
     return stats_df
 
-def create_averaged_normalized_table(normalized_tables, _motifs_df):
+def create_averaged_normalized_table(normalized_tables, motifs_df):
     """Create a table with normalized motif occurrences averaged across model replicates."""
     print("Creating averaged normalized table across model replicates...")
     

@@ -37,7 +37,12 @@ class DecimaModel(BaseModel):
 
         self.mask = mask
 
-        
+        # Initialize so static analysis sees these defined on every path
+        # (each branch below assigns them or raises before we reach the
+        # super().__init__ call further down).
+        model = None
+        needs_mask_channel = False
+
         if init_mode == "pretrained":
             print(f"Initializing with pretrained weights from {pretrained_source}")
             if pretrained_source == "wandb-human":
@@ -257,6 +262,11 @@ class DecimaModel(BaseModel):
         # Change head
         head = ConvHead(n_tasks=n_tasks, in_channels=1920, pool_func="avg")
 
+        if model is None:
+            raise ValueError(
+                f"Model was not initialized — unknown init_mode={init_mode!r}"
+                f" or pretrained_source={pretrained_source!r}"
+            )
         super().__init__(embedding=model.embedding, head=head)
 
         # Add a channel for the gene mask ONLY if needed

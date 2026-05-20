@@ -60,7 +60,7 @@ model.eval()
 models = [model.to(device)]
 
 print("Computing predictions")
-preds = np.stack([model.predict_on_dataset(ds, devices=0, batch_size=6, num_workers=16) for model in models]).mean(0).T
+preds = np.stack([m.predict_on_dataset(ds, devices=0, batch_size=6, num_workers=16) for m in models]).mean(0).T
 ad.layers['preds'] = preds
 
 print("Computing correlations per gene")

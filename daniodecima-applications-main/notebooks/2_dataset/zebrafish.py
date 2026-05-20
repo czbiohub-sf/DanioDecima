@@ -122,7 +122,7 @@ import pandas as pd
 genes_of_interest = ['sox2', 'pax6', 'neurog1', 'neurod1', 'gfap', 'gpr19', 'ptpn12', 'chmp1a']  # Replace with your genes
 
 # Make sure all genes exist in the dataset
-genes_to_plot = [gene for gene in genes_of_interest if gene in periderm_cells.var_names]
+genes_to_plot = [g for g in genes_of_interest if g in periderm_cells.var_names]
 if len(genes_to_plot) < len(genes_of_interest):
     missing_genes = set(genes_of_interest) - set(genes_to_plot)
     print(f"Warning: Some genes not found in dataset: {missing_genes}")

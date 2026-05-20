@@ -183,6 +183,24 @@ class DecimaModel(BaseModel):
                     raise RuntimeError(f"Pretrained weight loading failed: {e}") from e
             elif pretrained_source == "local" and checkpoint_path:
                 try:
+                    model = BorzoiModel(
+                        crop_len=5120,
+                        n_tasks=7611,
+                        stem_channels=512,
+                        stem_kernel_size=15,
+                        init_channels=608,
+                        n_conv=7,
+                        kernel_size=5,
+                        n_transformers=8,
+                        key_len=64,
+                        value_len=192,
+                        pos_dropout=0.0,
+                        attn_dropout=0.0,
+                        n_heads=8,
+                        n_pos_features=32,
+                        final_act_func=None,
+                        final_pool_func=None,
+                    )
                     state_dict = torch.load(checkpoint_path, weights_only=True)
                     model.load_state_dict(state_dict)
                     print(f"Successfully loaded pretrained weights from {checkpoint_path}")

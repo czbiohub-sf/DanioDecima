@@ -174,7 +174,6 @@ for row in tqdm(genes.itertuples(), desc="Processing genes"):
     in_gene = np.array([False]*524288)
     in_promoter = np.array([False]*524288)
     in_exons = np.array([False]*524288)
-    in_introns = np.array([False]*524288)
     in_junctions = np.array([False]*524288)
     in_cre = np.array([False]*524288)
     out_1k = np.array([False]*524288)

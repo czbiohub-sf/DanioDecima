@@ -121,7 +121,7 @@ class GeneTissueSpecificLSTM(nn.Module):
             tissue_expr = expr_series[:, :, tissue_idx:tissue_idx+1]  # [batch, history, 1]
             
             # Process with tissue-specific LSTM
-            lstm_out, (h_n, _) = self.tissue_lstms[tissue_idx](tissue_expr)
+            _, (h_n, _) = self.tissue_lstms[tissue_idx](tissue_expr)
             tissue_hidden = h_n[-1]  # Last layer's hidden state [batch, hidden_dim]
             
             # Combine with gene context to create gene-tissue specific representation

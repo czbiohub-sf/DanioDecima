@@ -51,7 +51,7 @@ save_dir = "/hpc/scratch/group.data.science/mathias.voges/zebrahub-decima/data/c
 h5_file = os.path.join(save_dir, "data.h5")
 
 # Find the data_out file for this specific model
-data_out_files = [f for f in os.listdir(args.model_dir) if f.startswith('data_out_') and f.endswith('.h5ad')]
+data_out_files = [fn for fn in os.listdir(args.model_dir) if fn.startswith('data_out_') and fn.endswith('.h5ad')]
 if not data_out_files:
     raise FileNotFoundError(f"No data_out file found in {args.model_dir}")
 data_out_path = os.path.join(args.model_dir, data_out_files[0])

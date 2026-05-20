@@ -64,7 +64,7 @@ print(ad)
 train_dataset = read_hdf5.GeneForecastDataset(h5_file=h5_file, ad=ad, key="train", max_seq_shift=5000, augment_mode="random", seed=0, history_length=7, forecast_horizon=3)
 
 # %%
-train_dataset[4]
+print(train_dataset[4])
 
 # %%
 

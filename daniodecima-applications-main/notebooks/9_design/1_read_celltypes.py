@@ -585,7 +585,7 @@ def create_motif_plots(motif_results, sequence, output_prefix):
         # Plot top motifs by score
         top_motifs = motif_results.nlargest(10, 'score')
         
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
+        _, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
         
         # Plot 1: Top motifs by score
         for i, (_, motif) in enumerate(top_motifs.iterrows()):

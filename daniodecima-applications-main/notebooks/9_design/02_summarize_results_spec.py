@@ -195,7 +195,7 @@ def create_motif_occurrence_tables(motifs_df):
     
     return tables, summaries
 
-def create_enhanced_plots(motifs_df, tables, output_dir):
+def create_enhanced_plots(motifs_df, _tables, output_dir):
     """Create enhanced comparison plots including ISM weight and specificity analysis."""
     output_dir = Path(output_dir)
     
@@ -599,7 +599,7 @@ def create_replicate_success_report(replicate_stats, output_dir):
     print("✓ Replicate success report saved")
     return stats_df
 
-def create_averaged_normalized_table(normalized_tables, motifs_df):
+def create_averaged_normalized_table(normalized_tables, _motifs_df):
     """Create a table with normalized motif occurrences averaged across model replicates."""
     print("Creating averaged normalized table across model replicates...")
     

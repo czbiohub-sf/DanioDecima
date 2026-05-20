@@ -154,7 +154,7 @@ class LightningModel(pl.LightningModule):
         x = self.transform(x)
         return x
 
-    def training_step(self, batch: Tensor, batch_idx: int) -> Tensor:
+    def training_step(self, batch: Tensor, _batch_idx: int) -> Tensor:
         x, y = batch
         logits = self.forward(x, logits=True)
         decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
@@ -164,7 +164,7 @@ class LightningModel(pl.LightningModule):
         loss = decima_loss
         return loss
 
-    def validation_step(self, batch: Tensor, batch_idx: int) -> Tensor:
+    def validation_step(self, batch: Tensor, _batch_idx: int) -> Tensor:
         x, y = batch
         logits = self.forward(x, logits=True)
         decima_loss, poisson_term, multinomial_term = self.decima_loss(logits, y)
@@ -193,7 +193,7 @@ class LightningModel(pl.LightningModule):
         self.val_metrics.reset()
         self.val_losses = []
 
-    def test_step(self, batch: Tensor, batch_idx: int) -> Tensor:
+    def test_step(self, batch: Tensor, _batch_idx: int) -> Tensor:
         """
         Calculate metrics after a single test step
         """
@@ -446,8 +446,8 @@ class LightningModel(pl.LightningModule):
         devices: int = 0,
         num_workers: int = 1,
         batch_size: int = 6,
-        augment_aggfunc: Union[str, Callable] = "mean",
-        compare_func: Optional[Union[str, Callable]] = None,
+        _augment_aggfunc: Union[str, Callable] = "mean",
+        _compare_func: Optional[Union[str, Callable]] = None,
     ):
         """
         Predict for a dataset of sequences or variants

@@ -22,7 +22,7 @@ from loss import TaskWisePoissonMultinomialLoss
 
 #TODO: replace tissue with celltype
 class GeneTissueSpecificLSTM(nn.Module):
-    def __init__(self, expr_input_dim, hidden_dim=64, n_tissues=6, forecast_horizon=3, 
+    def __init__(self, _expr_input_dim, hidden_dim=64, n_tissues=6, forecast_horizon=3, 
                  num_layers=2, dropout=0.2, gene_embedding_dim=1920):
         """
         LSTM-based model that captures gene-celltype specific dynamics for forecasting.
@@ -418,7 +418,7 @@ class JointLightningModel(pl.LightningModule):
         decima_pred = self.transform(decima_pred)
         return decima_pred, forecast_pred, embedding, ae_reconstruction
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, _batch_idx):
         # Assume the batch dict includes: "static_sequence", "expr_series", "target"
         decima_pred, forecast_pred, embedding, ae_reconstruction = self.forward(batch, logits=True)
         # For decima loss, assume we want to reconstruct the historical expression.
@@ -442,7 +442,7 @@ class JointLightningModel(pl.LightningModule):
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True, sync_dist=True)
         return loss
 
-    def on_train_batch_end(self, outputs, batch, batch_idx):
+    def on_train_batch_end(self, _outputs, _batch, _batch_idx):
         # Check if embeddings are being updated
         if batch_idx == 0 and self.current_epoch % 5 == 0:  # Check every 5 epochs
             # Get a sample parameter from the embedding
@@ -463,7 +463,7 @@ class JointLightningModel(pl.LightningModule):
             self.log("embedding_param_change", param_change)
             self.log("embedding_param_norm", param_norm)
     
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, _batch_idx):
         decima_pred, forecast_pred, _, _ = self.forward(batch, logits=True)
         historical_target = batch["expr_series"]#.mean(dim=1)
         historical_target = historical_target.reshape(historical_target.size(0), -1)
@@ -497,7 +497,7 @@ class JointLightningModel(pl.LightningModule):
         self.val_metrics.reset()
         self.val_losses = []
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, _batch_idx):
         decima_pred, forecast_pred, _, _ = self.forward(batch, logits=True)
         historical_target = batch["expr_series"]#.mean(dim=1)
         historical_target = historical_target.reshape(historical_target.size(0), -1)
@@ -683,8 +683,8 @@ class JointLightningModel(pl.LightningModule):
         devices: int = 0,
         num_workers: int = 1,
         batch_size: int = 6,
-        augment_aggfunc: Union[str, Callable] = "mean",
-        compare_func: Optional[Union[str, Callable]] = None,
+        _augment_aggfunc: Union[str, Callable] = "mean",
+        _compare_func: Optional[Union[str, Callable]] = None,
     ):
         """
         Predict for a dataset of sequences or variants using the joint model.

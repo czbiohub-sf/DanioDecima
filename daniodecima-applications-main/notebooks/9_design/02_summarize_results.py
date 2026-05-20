@@ -223,7 +223,7 @@ def create_heatmaps_by_model(tables, output_dir, top_n_motifs=30):
         
         print(f"  ✓ Saved heatmap: {filename}")
 
-def create_comparison_plots(motifs_df, tables, output_dir):
+def create_comparison_plots(motifs_df, _tables, output_dir):
     """Create additional comparison plots across models."""
     output_dir = Path(output_dir)
     

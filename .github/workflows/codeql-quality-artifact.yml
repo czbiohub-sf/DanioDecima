@@ -1,0 +1,93 @@
+# CodeQL Quality SARIF as artifact
+#
+# Runs CodeQL with the code-quality query suite and uploads the SARIF as
+# a workflow artifact so it can be downloaded and parsed locally. Does
+# NOT upload to GitHub's code-scanning UI (the default-setup CodeQL
+# workflow already does that). Self-contained — delete this file to
+# disable.
+#
+# Trigger: manual only (workflow_dispatch). Run on demand when you need
+# to see the actual Code Quality findings, since GitHub's REST API
+# doesn't expose them.
+
+name: CodeQL Quality Artifact (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Build CodeQL DB and run code-quality suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install CodeQL CLI
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/codeql"
+          cd "$RUNNER_TEMP/codeql"
+          curl -fsSL -o cli.tar.gz \
+            "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64.tar.gz"
+          tar xzf cli.tar.gz
+          echo "$RUNNER_TEMP/codeql/codeql" >> "$GITHUB_PATH"
+
+      - name: Verify CodeQL CLI
+        run: codeql version
+
+      - name: Build CodeQL database (python)
+        run: |
+          set -euo pipefail
+          codeql database create db \
+            --language=python \
+            --source-root=. \
+            --threads=0
+
+      - name: Run code-quality queries
+        run: |
+          set -euo pipefail
+          # The standard code-quality suite shipped with codeql/python-queries
+          codeql database analyze db \
+            codeql/python-queries:codeql-suites/python-code-quality.qls \
+            --format=sarif-latest \
+            --output=quality.sarif \
+            --threads=0 \
+            --download
+
+      - name: Summarize findings (count + rules)
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json
+          sarif = json.load(open('quality.sarif'))
+          runs = sarif.get('runs', [])
+          total = 0
+          by_rule = {}
+          for run in runs:
+              for r in run.get('results', []):
+                  total += 1
+                  rule = r.get('ruleId') or '?'
+                  by_rule[rule] = by_rule.get(rule, 0) + 1
+          print(f'TOTAL FINDINGS: {total}')
+          for rule, count in sorted(by_rule.items(), key=lambda x: -x[1]):
+              print(f'  {count:4d}  {rule}')
+          PY
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-quality-sarif
+          path: quality.sarif
+          retention-days: 30
+          if-no-files-found: error

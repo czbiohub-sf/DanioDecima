@@ -141,7 +141,7 @@ This project adheres to the Contributor Covenant [code of conduct](https://githu
 
 ## Reporting Security Issues
 
-If you believe you have found a security issue, please responsibly disclose by contacting us at security@chanzuckerberg.com. See [SECURITY.md](SECURITY.md) for details.
+If you believe you have found a security issue, please responsibly disclose by contacting us at security@biohub.org. See [SECURITY.md](SECURITY.md) for details.
 
 ## License
 

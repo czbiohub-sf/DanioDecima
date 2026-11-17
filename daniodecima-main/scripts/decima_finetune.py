@@ -40,7 +40,7 @@ def train_single_experiment(config):
     from lightning import LightningModel
     
     # Use scratch space for temp directories instead of /tmp
-    base_scratch = "/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima"
+    base_scratch = config.get("scratch_dir", "/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima")
     unique_id = f"{os.getpid()}_{config['seed']}"
     temp_dir = os.path.join(base_scratch, "temp_dirs", f"genomepy_tmp_{unique_id}")
     
@@ -57,7 +57,7 @@ def train_single_experiment(config):
     
     
     # Load data
-    matrix_file = os.path.join(config["dir"], "zebrahub_aggregated.h5ad")
+    matrix_file = os.path.join(config["dir"], config.get("matrix_name", "zebrahub_aggregated.h5ad"))
     h5_file = os.path.join(config["dir"], "data.h5")
     
     ad = anndata.read_h5ad(matrix_file)
@@ -163,7 +163,13 @@ def main():
                        default="/hpc/projects/data.science/yangjoon.kim/zebrafish-seq2func-data/celltypes_chrom_split_v1/",
                        help="Data directory")
     parser.add_argument("--log_dir", type=str, required=True, help="Log directory")
-    
+    parser.add_argument("--matrix_name", type=str,
+                       default="zebrahub_aggregated.h5ad",
+                       help="Filename of the aggregated h5ad matrix within data_dir")
+    parser.add_argument("--scratch_dir", type=str,
+                       default="/hpc/scratch/group.data.science/yangjoon.kim/zebrahub-decima",
+                       help="Scratch directory for genomepy temp files")
+
     args = parser.parse_args()
     
     # Define all 16 experiments
@@ -173,6 +179,8 @@ def main():
     base_config = {
         "dir": args.data_dir,
         "log_dir": args.log_dir,
+        "matrix_name": args.matrix_name,
+        "scratch_dir": args.scratch_dir,
         "bs": 4,
         "weight": 1e-4,
         "weight_decay": 0,

@@ -41,6 +41,7 @@ documents/daniocell_*.md
 # Manuscript-figure regeneration workstream (lives on the figure-revision branch).
 # These files should not appear on main / code-review.
 manuscript_figures/
+*.pptx
 docs/slides/
 scripts/generate_slides_*.py
 # Figure-revision render outputs (live alongside the figure-revision branch only;
@@ -49,3 +50,4 @@ decima-applications-main/
 decima-main/
 **/render_fig*_*.py
 **/notebooks/*/figures/
+daniocell_paths.env
